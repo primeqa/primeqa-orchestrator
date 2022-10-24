@@ -22,7 +22,7 @@ limitations under the License.
 
 # Orchestrator REST Microservice
 
-This toolkit provides an orchestrator microservice that integrates PrimeQA's retriever & reader modules as a REST Server and also other "search" capabilities e.g. IBM Watson Discovery. 
+This toolkit provides an orchestrator microservice that integrates PrimeQA's retriever & reader modules as a REST Server and also other "search" capabilities e.g. IBM Watson Discovery.
 
 Hence, using this orchestrator one can either integrate a neural retriever like ColBERT from PrimeQA or external search e.g. IBM Watson Discovery to fetch documents and then use PrimeQA's reader to extract answer spans from those relevant documents.
 <br>
@@ -124,7 +124,7 @@ rm -rf security/certs/client/client.csr
 - Open `config.ini` and set `rest_port`
 - Open `Dockerfile` and set the same value to `port`
 - Run `docker build -f Dockerfile -t primeqa-orchestrator:$(cat VERSION) .` (creates docker image)
-- Run `docker run --rm --name primeqa_orchestrator -d -p <port>:<port> --mount type=bind,source="$(pwd)"/store,target=/store -e STORE_DIR=/store primeqa_orchestrator:$(cat VERSION)` (run docker container)
+- Run `docker run --rm --name primeqa-orchestrator -d -p <port>:<port> --mount type=bind,source="$(pwd)"/store,target=/store -e STORE_DIR=/store primeqa-orchestrator:$(cat VERSION)` (run docker container)
 - Go to <http://{Container's public URL}:{rest_port}/docs>
 - To be able to use `reader`, `indexer` and `retriever` services, be sure you have access to running instance of PrimeQA container
 
