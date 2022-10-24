@@ -1,0 +1,13 @@
+# Git
+.git
+
+# Python
+\*\*/**pycache**
+
+# Build Files
+build
+dist
+
+# Documentation and Data files
+static
+store

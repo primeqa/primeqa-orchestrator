@@ -1,0 +1,54 @@
+.idea/
+__pycache__/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+dist
+
+# Unit test / coverage reports
+.coverage
+coverage.xml
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Auto-generated gRPC files
+orchestrator/integrations/primeqa/grpc_generated/*py
+!orchestrator/integrations/primeqa/grpc_generated/__init__.py
+
+# vscode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Log files
+*.log
+
+# Local files
+store

@@ -1,0 +1,19 @@
+# -------------------------------------------------------
+###### Python dependencies required for development ######
+# -------------------------------------------------------
+###### Build ######
+setuptools
+wheel
+#
+###### Requirements for code management and styling ######
+black
+pylint
+#
+###### Generic Requirements ######
+#
+numpy==1.23.4
+ibm-watson==6.1.0
+grpcio==1.48.1
+grpcio-tools==1.48.1
+uvicorn==0.18.3
+fastapi==0.85.0
