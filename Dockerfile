@@ -36,7 +36,7 @@ WORKDIR /protos
 # Process primeqa Protos
 RUN mkdir primeqa
 COPY ./orchestrator/integrations/primeqa/protos/*.proto ./primeqa/
-RUN pip install grpcio-tools && \
+RUN pip install grpcio-tools==1.48.1 && \
     python -m grpc_tools.protoc -I./primeqa --python_out=./primeqa --grpc_python_out=./primeqa ./primeqa/*.proto && \
     # the grpc_tools appears to use python2 style import statements, which fail in python3
     # https://github.com/grpc/grpc/issues/9575, we convert the import statements using the provided
@@ -50,7 +50,7 @@ FROM python-base as wheel
 
 WORKDIR /app
 
-COPY ./setup.py ./VERSION ./LICENSE ./MANIFEST.in ./requirements.txt ./requirements_test.txt ./ 
+COPY ./setup.py ./VERSION ./LICENSE ./MANIFEST.in ./README.md ./requirements.txt ./requirements_test.txt ./ 
 
 COPY ./data ./data
 
