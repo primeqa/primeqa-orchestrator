@@ -115,6 +115,16 @@ rm -rf security/certs/client/client.csr
 
 - Open Python IDE & set the created virtual environment
 - Open `orchestrator/services/config/config.ini`, set `require_ssl = True` (if you wish to use TLS authentication) & `rest_port`
+- Generate GRPC:
+  ```shell
+  #!/usr/bin/env bash
+  set -xeuo pipefail
+  python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/indexer.proto
+  python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/parameter.proto
+  python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/reader.proto
+  python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/retriever.proto
+  2to3 --fix=import --nobackups --write orchestrator/integrations/primeqa/grpc_generated
+  ```
 - Open `application.py` and run/debug
 - Go to <http://localhost:{rest_port}/docs>
 - To be able to use `reader`, `indexer` and `retriever` services, be sure you have access to running instance of PrimeQA container
