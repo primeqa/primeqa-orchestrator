@@ -66,7 +66,7 @@ FROM python-base as base
 
 RUN apt update && \
     DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" \
-    apt install -y ca-certificates && \
+    apt install -y ca-certificates tini && \
     rm -rf /var/lib/apt/lists
 
 # Ephemeral certificates
@@ -99,12 +99,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Add Tini to reap zombies and ensure signals work
-ENV TINI_VERSION v0.14.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /tini
-RUN chmod +x /tini
-CMD ["/tini","run_orchestrator"]
-
+# Setup work dir
 WORKDIR /app
 
 # Install application
@@ -117,8 +112,11 @@ RUN pip install wheels/*.whl
 RUN pip list
 
 # Set store location
-ENV STORE=/data/store
-RUN mkdir -p ${STORE} && chmod -R 777 ${STORE}
+ENV STORE_DIR=/store
+RUN mkdir -p ${STORE_DIR} && chmod -R 777 ${STORE_DIR}
+
+# Set default run command
+CMD ["tini","run_orchestrator"]
 
 # Change to application user
 USER 2000
