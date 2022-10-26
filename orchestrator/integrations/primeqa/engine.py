@@ -192,7 +192,9 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
         elif rpc_error.code() == grpc.StatusCode.INVALID_ARGUMENT:
             raise Error(
-                ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value
+                ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value.format(
+                    rpc_error.details()
+                ).strip()
             ) from rpc_error
         else:
             raise Error(ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value) from rpc_error
@@ -246,7 +248,9 @@ def retrieve(retriever: dict, index_id: str, query: str):
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
         elif rpc_error.code() == grpc.StatusCode.INVALID_ARGUMENT:
             raise Error(
-                ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value
+                ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value.format(
+                    rpc_error.details()
+                ).strip()
             ) from rpc_error
         else:
             raise Error(ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value) from rpc_error

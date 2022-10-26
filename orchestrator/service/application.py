@@ -16,7 +16,7 @@
 # limitations under the License.
 
 import logging
-from typing import List, Union
+from typing import List, Literal, Union
 import time
 
 import uvicorn
@@ -30,8 +30,10 @@ from orchestrator.readers import ReadersRegistry, read
 
 from orchestrator.constants import (
     FEEDBACK,
+    FEEDBACK_RESPONSE_FORMAT,
     GENERIC,
     ANSWER,
+    ATTR_ID,
     ATTR_ANSWER,
     ATTR_DOCUMENT,
     ATTR_TEXT,
@@ -40,6 +42,8 @@ from orchestrator.constants import (
     ATTR_DOCUMENT_ID,
     ATTR_TITLE,
     ATTR_URL,
+    ATTR_ANSWERS,
+    ATTR_ANSWER_START,
 )
 from orchestrator.service.data_models import (
     QuestionAnsweringResponse,
@@ -51,6 +55,7 @@ from orchestrator.service.data_models import (
     QuestionAnsweringRequest,
     Document,
     Feedback,
+    FeedbackInPrimeQAFormat,
 )
 from orchestrator.exceptions import PATTERN_ERROR_MESSAGE, ErrorMessages, Error
 
@@ -444,10 +449,17 @@ def ask(qa_request: QuestionAnsweringRequest):
 @app.get(
     "/feedbacks",
     status_code=status.HTTP_200_OK,
-    response_model=List[Feedback],
+    response_model=Union[List[Feedback], List[FeedbackInPrimeQAFormat]],
     tags=["Feedback"],
 )
-def get_feedbacks(feedback_id: Union[List[str], None] = Query(default=None)):
+def get_feedbacks(
+    feedback_id: Union[List[str], None] = Query(default=None),
+    user_id: Union[List[str], None] = Query(default=None),
+    application: Union[List[str], None] = Query(default=None),
+    _format: Union[
+        Literal[FEEDBACK_RESPONSE_FORMAT.RAW, FEEDBACK_RESPONSE_FORMAT.PRIMEQA], None
+    ] = None,
+):
     """
     Retrieves feedback table data (/store/sqlite_db.db)
 
@@ -456,12 +468,35 @@ def get_feedbacks(feedback_id: Union[List[str], None] = Query(default=None)):
     list: dict (FeedbackRequest)
 
     """
+    where_clauses = {}
     if feedback_id:
-        return STORE.get_feedbacks(
-            where_clauses={FEEDBACK.FEEDBACK_ID.value: feedback_id}
-        )
-    else:
-        return STORE.get_feedbacks()
+        where_clauses[FEEDBACK.FEEDBACK_ID.value] = feedback_id
+
+    if user_id:
+        where_clauses[FEEDBACK.USER_ID.value] = user_id
+
+    if application:
+        where_clauses[FEEDBACK.APPLICATION.value] = application
+
+    feedbacks = STORE.get_feedbacks(where_clauses=where_clauses)
+
+    if _format and _format == FEEDBACK_RESPONSE_FORMAT.PRIMEQA.value:
+        # *special case*: "primeqa" format assumes only positive feedback returns
+        return [
+            {
+                ATTR_ID: feedback_idx,
+                FEEDBACK.QUESTION.value: feedback[FEEDBACK.QUESTION.value],
+                FEEDBACK.CONTEXT.value: feedback[FEEDBACK.CONTEXT.value],
+                ATTR_ANSWERS: {
+                    ATTR_TEXT: [feedback[FEEDBACK.ANSWER.value]],
+                    ATTR_ANSWER_START: [feedback[FEEDBACK.START_CHAR_OFFSET.value]],
+                },
+            }
+            for feedback_idx, feedback in enumerate(feedbacks)
+            if feedback[FEEDBACK.THUMBS_UP] == 1
+        ]
+
+    return feedbacks
 
 
 @app.post(
