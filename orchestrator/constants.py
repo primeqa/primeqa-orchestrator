@@ -48,6 +48,7 @@ ATTR_ANSWERS = "answers"
 ATTR_ANSWER = "answer"
 ATTR_START_CHAR_OFFSET = "start_char_offset"
 ATTR_END_CHAR_OFFSET = "end_char_offset"
+ATTR_ANSWER_START = "answer_start"
 
 
 class RETRIEVER(str, Enum):
@@ -119,3 +120,9 @@ class FEEDBACK(str, Enum):
     ANSWER = "answer"
     START_CHAR_OFFSET = "start_char_offset"
     END_CHAR_OFFSET = "end_char_offset"
+    APPLICATION = "application"
+
+
+class FEEDBACK_RESPONSE_FORMAT(str, Enum):
+    RAW = "raw"
+    PRIMEQA = "primeqa"

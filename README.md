@@ -140,10 +140,99 @@ rm -rf security/certs/client/client.csr
 
 <h2>🚨 Configure </h2>
 
-- Before first use, you will need to specify few neccessary configurations to connect to third-party depedencies.
-- Execute `[GET] /settings` endpoint to fetch existing settings.
-- Update service endpoint for `PrimeQA` to point to url (inclusive of port) of PrimeQA instance in `retriever` and `reader` sections in settings.
+- Before first use, you will need to specify few neccessary configurations to connect to third-party depedencies. These setting are intentionally left blank for security purposes.
+
+- Open browser of choice (Mozilla Firefox/Google chorme) and visit `http://localhost:50059/docs`. This url shows available orchestrator APIs.
+
+- To **inspect** existing settings click on [GET] `/settings`. Once exapanded, click on `Try it out` button.
+
+- To **update** settings, Click on [PATCH] `/settings`. Once expanded, click on `Try it out` button and copy-paste following content in the request body section. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
+
+  a. For IBM® Watson Discovery based retriever, add/update `Watson Discovery` releated section in `retrievers`
+
+  ```json
+      "Watson Discovery": {
+          "service_endpoint": "<IBM® Watson Discovery Cloud/CP4D Instance Endpoint>",
+          "service_token": "<Bearer token (If using IBM® Watson Discovery CP4D Instance)>",
+          "service_api_key": "<API key (If using IBM® Watson Discovery Cloud instance)>",
+          "service_project_id": "<IBM® Watson Discovery Project ID>"
+      }
+  ```
+
+  b. For PrimeQA based retrievers, add/update `PrimeQA` related section in `retrievers` as follows
+
+  ```json
+      "PrimeQA": {
+          "service_endpoint": "<Primeqa Instance Endpoint>:50051"
+      }
+  ```
+
+  c. For PrimeQA based readers, add/update `PrimeQA` related section in `readers` as follows
+
+  ```json
+      "PrimeQA": {
+          "service_endpoint": "<Primeqa Instance Endpoint>:50051",
+          "beta": 0.7
+      }
+  ```
+
+  For example, when IBM® Watson Discovery CP4D instance based retriever and PrimeQA based reader is used, the settings will look as follows
+
+  ```json
+  {
+    "retrievers": {
+      "Watson_Discovery": {
+        "service_endpoint": "<IBM® Watson Discovery CP4D Instance Endpoint>",
+        "service_token": "<Bearer token>",
+        "service_project_id": "<IBM® Watson Discovery Project ID>"
+      },
+      "alpha": 0.8
+    },
+    "readers": {
+      "PrimeQA": {
+        "service_endpoint": "<Primeqa Instance Endpoint>:50051",
+        "beta": 0.7
+      }
+    }
+  }
+  ```
+
+- Click `Execute` button. You will see status code: 200 and updated setting once you scroll down.
+
+  **Example**:
   ![Example](/static/primeqa_orchestrator_patch_settings.gif)
+
+<h3> 🧪 Testing </h3>
+
+1. To see all available retrievers, execute [GET] `/retrievers` endpoint
+
+```sh
+	curl -X 'GET' 'http://{PUBLIC_IP}:50059/retrievers' -H 'accept: application/json'
+```
+
+2. To see all available readers, execute [GET] `/readers` endpoint
+
+```sh
+	curl -X 'GET' 'http://{PUBLIC_IP}:50059/readers' -H 'accept: application/json'
+```
+
+<h2> Frequenty Asked Questions (FAQs) </h2>
+
+<h4>1. How do I get feedbacks to fine tune my reader model? </h4>
+  
+  ```sh
+    curl -X 'GET' \
+  'http://localhost:50059/feedbacks?application=reading&application=qa&_format=primeqa' \
+  -H 'accept: application/json' > feedbacks.json
+  ```
+
+<h4>2. How do I get feedbacks to fine tune my retriever model? </h4>
+  
+  ```sh
+    curl -X 'GET' \
+  'http://localhost:50059/feedbacks?application=retrieval&_format=primeqa' \
+  -H 'accept: application/json' > feedbacks.json
+  ```
 
 <!-- START sphinx doc instructions - DO NOT MODIFY next code, please -->
 <!-- PrimeQA doc sync -->

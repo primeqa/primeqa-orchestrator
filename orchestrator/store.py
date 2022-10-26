@@ -67,7 +67,7 @@ class Store:
             conn = sqlite3.connect(self.root_dir + "/sqlite_db.db")
             cur = conn.cursor()
             cur.execute(
-                "CREATE TABLE IF NOT EXISTS feedback_table (feedback_id VARCHAR, user_id VARCHAR, question VARCHAR, answer VARCHAR, thumbs_up BOOLEAN, thumbs_down BOOLEAN, context VARCHAR, start_char_offset INTEGER, end_char_offset INTEGER)"
+                "CREATE TABLE IF NOT EXISTS feedback_table (feedback_id VARCHAR, user_id VARCHAR, question VARCHAR, answer VARCHAR, thumbs_up BOOLEAN, thumbs_down BOOLEAN, context VARCHAR, start_char_offset INTEGER, end_char_offset INTEGER, application VARCAR)"
             )
             conn.commit()
             conn.close()
@@ -157,6 +157,7 @@ class Store:
                     FEEDBACK.CONTEXT.value: row[6],
                     FEEDBACK.START_CHAR_OFFSET.value: row[7],
                     FEEDBACK.END_CHAR_OFFSET.value: row[8],
+                    FEEDBACK.APPLICATION.value: row[9] if len(row) > 9 else None,
                 }
                 for row in rows
             ]
@@ -208,7 +209,7 @@ class Store:
                 )
             else:
                 cur.execute(
-                    "INSERT INTO feedback_table VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO feedback_table VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     list(feedback.values()),
                 )
             conn.commit()

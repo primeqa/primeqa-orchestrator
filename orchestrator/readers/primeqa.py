@@ -18,8 +18,6 @@
 import logging
 from typing import List
 
-from google.protobuf.json_format import MessageToDict
-
 from orchestrator.exceptions import Error, ErrorMessages
 from orchestrator.constants import (
     GENERIC,

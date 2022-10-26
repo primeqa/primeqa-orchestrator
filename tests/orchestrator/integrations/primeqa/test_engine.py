@@ -50,6 +50,7 @@ class TestPrimeQAIntegration:
     def mock_grpc_invalid_argument_error(self) -> Exception:
         grpc_error = grpc.RpcError()
         grpc_error.code = lambda: grpc.StatusCode.INVALID_ARGUMENT
+        grpc_error.details = lambda: "MOCK ERROR"
         return grpc_error
 
     @pytest.fixture()
@@ -169,7 +170,10 @@ class TestPrimeQAIntegration:
     ):
         mock_READER_STUB.GetAnswers.side_effect = mock_grpc_invalid_argument_error
         with pytest.raises(
-            Error, match=ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value
+            Error,
+            match=ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value.format(
+                "MOCK ERROR"
+            ).strip(),
         ):
             get_answers(
                 reader={"reader_id": "test reader"},
@@ -182,7 +186,10 @@ class TestPrimeQAIntegration:
         self, mock_READER_STUB, mock_grpc_unknown_error
     ):
         mock_READER_STUB.GetAnswers.side_effect = mock_grpc_unknown_error
-        with pytest.raises(Error, match=ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value):
+        with pytest.raises(
+            Error,
+            match=ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value,
+        ):
             get_answers(
                 reader={"reader_id": "test reader"},
                 query="test query",
@@ -235,7 +242,10 @@ class TestPrimeQAIntegration:
     ):
         mock_RETRIEVER_STUB.Retrieve.side_effect = mock_grpc_invalid_argument_error
         with pytest.raises(
-            Error, match=ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value
+            Error,
+            match=ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value.format(
+                "MOCK ERROR"
+            ).strip(),
         ):
             retrieve(
                 retriever={"retriever_id": "test retriever"},

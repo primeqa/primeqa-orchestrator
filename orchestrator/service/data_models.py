@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union, Literal
+from typing import List, Dict, Union, Literal
 from pydantic import BaseModel
 
 from orchestrator.constants import PARAMETER
@@ -131,3 +131,11 @@ class Feedback(BaseModel):
     context: Union[str, None] = None
     start_char_offset: Union[int, None] = None
     end_char_offset: Union[int, None] = None
+    application: Union[str, None] = None
+
+
+class FeedbackInPrimeQAFormat(BaseModel):
+    id: str
+    question: str
+    context: str
+    answers: Dict[str, Union[List[str], List[int]]]
