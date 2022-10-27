@@ -138,4 +138,4 @@ class FeedbackInPrimeQAFormat(BaseModel):
     id: str
     question: str
     context: str
-    answers: Dict[str, Union[List[str], List[int]]]
+    answers: Dict[str, Union[List[int], List[str]]]
