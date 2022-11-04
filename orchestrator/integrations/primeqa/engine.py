@@ -52,6 +52,9 @@ from orchestrator.integrations.primeqa.grpc_generated.reader_pb2 import (
 from orchestrator.integrations.primeqa.grpc_generated.indexer_pb2_grpc import (
     IndexerStub,
 )
+from orchestrator.integrations.primeqa.grpc_generated.indexer_pb2 import (
+    GetIndexesRequest,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -263,7 +266,16 @@ def retrieve(retriever: dict, index_id: str, query: str):
 #                               Indexer RPCs (PrimeQA gRPC Service)
 # ------------------------------------------------------------------------------------------------
 def get_indexes(retriever_id: str):
-    return []
+    response = INDEXER_STUB.GetIndexes(GetIndexesRequest())
+    index_informations = MessageToDict(response, preserving_proto_field_name=True)['indexes']
+    
+    return [
+        {
+            "collection_id": index_information["index_id"],
+            "name": index_information["index_id"],
+        }
+        for index_information in index_informations
+    ]
 
 
 # ------------------------------------ END -------------------------------------------------------
