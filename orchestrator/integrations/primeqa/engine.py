@@ -75,6 +75,8 @@ READER_STUB = None
 def build_grpc_parameters(parameters: list) -> List[Parameter]:
     grpc_parameters = []
     for parameter in parameters:
+        if parameter[PARAMETER.ATTR_VALUE.value] is None:
+            continue
         grpc_parameter = Parameter(parameter_id=parameter[PARAMETER.ATTR_ID.value])
         if (
             parameter[PARAMETER.ATTR_TYPE.value]
@@ -90,7 +92,7 @@ def build_grpc_parameters(parameters: list) -> List[Parameter]:
         ):
             grpc_parameter.type = "Numeric"
             grpc_parameter.value.CopyFrom(
-                Value(number_value=parameter[PARAMETER.ATTR_VALUE.value])
+                    Value(number_value=parameter[PARAMETER.ATTR_VALUE.value])
             )
         elif (
             parameter[PARAMETER.ATTR_TYPE.value]
@@ -231,7 +233,7 @@ def get_retrievers():
 def retrieve(retriever: dict, index_id: str, query: str):
     documents = list()
     try:
-        for response in RETRIEVER_STUB.Retrieve(
+        for document in RETRIEVER_STUB.Retrieve(
             RetrieveRequest(
                 retriever=RetrieverComponent(
                     retriever_id=retriever[RETRIEVER.ATTR_ID.value],
@@ -244,8 +246,8 @@ def retrieve(retriever: dict, index_id: str, query: str):
                 index_id=index_id,
                 queries=[query],
             )
-        ):
-            documents.append(MessageToDict(response, preserving_proto_field_name=True))
+        ).hits[0].hits:
+            documents.append(MessageToDict(document, preserving_proto_field_name=True))
     except grpc.RpcError as rpc_error:
         if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
@@ -268,7 +270,6 @@ def retrieve(retriever: dict, index_id: str, query: str):
 def get_indexes(retriever_id: str):
     response = INDEXER_STUB.GetIndexes(GetIndexesRequest())
     index_informations = MessageToDict(response, preserving_proto_field_name=True)['indexes']
-    
     return [
         {
             "collection_id": index_information["index_id"],
