@@ -92,7 +92,7 @@ def build_grpc_parameters(parameters: list) -> List[Parameter]:
         ):
             grpc_parameter.type = "Numeric"
             grpc_parameter.value.CopyFrom(
-                    Value(number_value=parameter[PARAMETER.ATTR_VALUE.value])
+                Value(number_value=parameter[PARAMETER.ATTR_VALUE.value])
             )
         elif (
             parameter[PARAMETER.ATTR_TYPE.value]
@@ -104,9 +104,10 @@ def build_grpc_parameters(parameters: list) -> List[Parameter]:
             )
         else:
             _logger.debug(
+                "%s",
                 ErrorMessages.UNSUPPORTED_PARAMETER_TYPE.value.format(
                     type(parameter[PARAMETER.ATTR_VALUE.value])
-                )
+                ),
             )
             _logger.debug("Skipping parameter: %s", parameter[PARAMETER.ATTR_ID.value])
             continue
@@ -233,21 +234,27 @@ def get_retrievers():
 def retrieve(retriever: dict, index_id: str, query: str):
     documents = list()
     try:
-        for document in RETRIEVER_STUB.Retrieve(
-            RetrieveRequest(
-                retriever=RetrieverComponent(
-                    retriever_id=retriever[RETRIEVER.ATTR_ID.value],
-                    parameters=build_grpc_parameters(
-                        retriever[RETRIEVER.ATTR_PARAMETERS.value]
-                        if RETRIEVER.ATTR_PARAMETERS.value in retriever
-                        else []
+        for document in (
+            RETRIEVER_STUB.Retrieve(
+                RetrieveRequest(
+                    retriever=RetrieverComponent(
+                        retriever_id=retriever[RETRIEVER.ATTR_ID.value],
+                        parameters=build_grpc_parameters(
+                            retriever[RETRIEVER.ATTR_PARAMETERS.value]
+                            if RETRIEVER.ATTR_PARAMETERS.value in retriever
+                            else []
+                        ),
                     ),
-                ),
-                index_id=index_id,
-                queries=[query],
+                    index_id=index_id,
+                    queries=[query],
+                )
             )
-        ).hits[0].hits:
+            .hits[0]
+            .hits
+        ):
             documents.append(MessageToDict(document, preserving_proto_field_name=True))
+    except IndexError as err:
+        raise Error(ErrorMessages.PRIMEQA_FAILED_TO_FIND_ANSWER.value.strip()) from err
     except grpc.RpcError as rpc_error:
         if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
@@ -268,15 +275,22 @@ def retrieve(retriever: dict, index_id: str, query: str):
 #                               Indexer RPCs (PrimeQA gRPC Service)
 # ------------------------------------------------------------------------------------------------
 def get_indexes(retriever_id: str):
-    response = INDEXER_STUB.GetIndexes(GetIndexesRequest())
-    index_informations = MessageToDict(response, preserving_proto_field_name=True)['indexes']
-    return [
-        {
-            "collection_id": index_information["index_id"],
-            "name": index_information["index_id"],
-        }
-        for index_information in index_informations
-    ]
+    try:
+        return [
+            {"collection_id": index.index_id, "name": index.index_id}
+            for index in INDEXER_STUB.GetIndexes(GetIndexesRequest()).indexes
+        ]
+    except grpc.RpcError as rpc_error:
+        if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+            raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
+        elif rpc_error.code() == grpc.StatusCode.INVALID_ARGUMENT:
+            raise Error(
+                ErrorMessages.PRIMEQA_INVALID_ARGUMENT_ERROR.value.format(
+                    rpc_error.details()
+                ).strip()
+            ) from rpc_error
+        else:
+            raise Error(ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value) from rpc_error
 
 
 # ------------------------------------ END -------------------------------------------------------
