@@ -1,5 +1,7 @@
 from typing import List, Union
 from datetime import datetime, timedelta, timezone
+from copy import deepcopy
+
 from orchestrator.store import StoreFactory
 from orchestrator.constants import (
     GENERIC,
@@ -148,6 +150,10 @@ def retrieve(
 
     # Step 3: If retriever parameter are provided
     if parameters_with_updates:
+        # Step 3.a: Create a deepcopy to preserve default values for retriever
+        retriever = deepcopy(retriever)
+
+        # Step 3.b: Update parameter values in newly deep-copied retriever
         for parameter_with_update in parameters_with_updates:
             for existing_parameter in retriever[ATTR_PARAMETERS]:
                 if (

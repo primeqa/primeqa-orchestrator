@@ -1,5 +1,7 @@
 from typing import List, Union
 from datetime import datetime, timedelta, timezone
+from copy import deepcopy
+
 from orchestrator.store import StoreFactory
 from orchestrator.constants import (
     GENERIC,
@@ -96,6 +98,10 @@ def read(
 
     # Step 3: If parameters with update are provided
     if parameters_with_updates:
+        # Step 3.a: Create a deepcopy to preserve default values for reader
+        reader = deepcopy(reader)
+
+        # Step 3.b: Update parameter values in newly deep-copied reader
         for parameter_with_update in parameters_with_updates:
             for existing_parameter in reader[ATTR_PARAMETERS]:
                 if (
