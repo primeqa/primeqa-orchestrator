@@ -1,4 +1,4 @@
-name: primeqa-ci
+name: primeqa-orchestrator-ci
 on:
   push:
     branches: ["main"]
