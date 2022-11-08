@@ -20,6 +20,7 @@ limitations under the License.
 </div>
 <!-- END sphinx doc instructions - DO NOT MODIFY above code, please -->
 
+
 # Orchestrator REST Microservice
 
 This toolkit provides an orchestrator microservice that integrates PrimeQA's retriever & reader modules as a REST Server and also other "search" capabilities e.g. IBM Watson Discovery.
@@ -27,6 +28,7 @@ This toolkit provides an orchestrator microservice that integrates PrimeQA's ret
 Hence, using this orchestrator one can either integrate a neural retriever like ColBERT from PrimeQA or external search e.g. IBM Watson Discovery to fetch documents and then use PrimeQA's reader to extract answer spans from those relevant documents.
 <br>
 
+![Build Status](https://github.com/primeqa/primeqa-orchestrator/actions/workflows/primeqa-orchestrator-ci.yml/badge.svg)
 [![LICENSE|Apache2.0](https://img.shields.io/github/license/saltstack/salt?color=blue)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 <h3>✔️ Getting Started</h3>
