@@ -31,10 +31,10 @@ jobs:
           pip install -r requirements_test.txt
       - name: Auto-generate gRPC python code
         run: |
-          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/protos/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/protos/grpc_generated orchestrator/integrations/primeqa/protos/parameter.proto
-          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/protos/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/protos/grpc_generated orchestrator/integrations/primeqa/protos/reader.proto 
-          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/protos/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/protos/grpc_generated orchestrator/integrations/primeqa/protos/indexer.proto
-          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/protos/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/protos/grpc_generated orchestrator/integrations/primeqa/protos/retriever.proto
+          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/parameter.proto
+          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/reader.proto 
+          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/indexer.proto
+          python -m grpc_tools.protoc -I ./orchestrator/integrations/primeqa/protos --python_out=orchestrator/integrations/primeqa/grpc_generated --grpc_python_out=orchestrator/integrations/primeqa/grpc_generated orchestrator/integrations/primeqa/protos/retriever.proto
           2to3 --fix=import --nobackups --write orchestrator/integrations/primeqa/grpc_generated
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
