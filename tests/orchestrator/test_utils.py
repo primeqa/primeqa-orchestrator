@@ -97,12 +97,13 @@ class TestUtils:
         assert data["key 2"]["key 3"] == "value x"
 
     def test_min_max_normalization(self):
-        scores = [5, 4, 3, 1, 0]
-        normalized_scores = min_max_normalization(scores)
+        normalized_scores = min_max_normalization(scores=[5, 4, 3, 1, 0])
         assert normalized_scores[0] == 1.0
+        assert normalized_scores[1] < 1.0
 
-        with pytest.raises(RuntimeError, match="Division by zero"):
-            min_max_normalization([5])
+        normalized_scores = min_max_normalization(scores=[10, 10])
+        assert normalized_scores[0] == 1.0
+        assert normalized_scores[1] == 1.0
 
     def test_normalize(self):
         data_1 = [{"value": 5}, {"value": 4}, {"value": 3}, {"value": 2}, {"value": 1}]

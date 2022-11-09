@@ -171,6 +171,7 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
                     parameters=build_grpc_parameters(
                         reader[READER.ATTR_PARAMETERS.value]
                         if READER.ATTR_PARAMETERS.value in reader
+                        and reader[READER.ATTR_PARAMETERS.value]
                         else []
                     ),
                 ),
@@ -242,6 +243,7 @@ def retrieve(retriever: dict, index_id: str, query: str):
                         parameters=build_grpc_parameters(
                             retriever[RETRIEVER.ATTR_PARAMETERS.value]
                             if RETRIEVER.ATTR_PARAMETERS.value in retriever
+                            and retriever[RETRIEVER.ATTR_PARAMETERS.value]
                             else []
                         ),
                     ),

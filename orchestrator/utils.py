@@ -130,7 +130,7 @@ def min_max_normalization(scores: List[Union[int, float]]):
     high = max(scores)
     width = high - low
     if width == 0:
-        raise RuntimeError("Division by zero")
+        return [1.0] * len(scores)
     return [(s - low) / width for s in scores]
 
 
