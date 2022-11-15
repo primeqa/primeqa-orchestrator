@@ -19,9 +19,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from orchestrator.utils import (
-    extract_domain_url,
-    extract_domain_name,
-    generate_id,
     load_json,
     min_max_normalization,
     normalize,
@@ -39,17 +36,6 @@ class TestUtils:
     @pytest.fixture
     def mock_json(self, mocker) -> MagicMock:
         return mocker.patch("orchestrator.utils.json")
-
-    def test_extract_domain_url(self):
-        assert extract_domain_url("https://example.com/test") == "https://example.com"
-        assert extract_domain_url("http://example.com/test") == "http://example.com"
-
-    def test_extract_domain_name(self):
-        assert extract_domain_name("https://example.com/test") == "example.com"
-        assert extract_domain_name("http://example.com/test") == "example.com"
-
-    def test_generate_id(self):
-        assert isinstance(generate_id(), str)
 
     def test_load_json(self, mock_open, mock_json):
         load_json(file_path="test file path")

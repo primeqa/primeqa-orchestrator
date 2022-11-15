@@ -18,35 +18,8 @@
 from typing import List, Union
 import json
 import os
-import re
 import collections.abc as abc
-import uuid
 from orchestrator.constants import ATTR_CONFIDENCE
-
-# Captures domain name
-REGEX_DOMAIN_URL = re.compile("(https?://[a-zA-Z0-9_.-]*)/?.*")
-REGEX_DOMAIN_NAME = re.compile("https?://([a-zA-Z0-9_.-]*)/?.*")
-
-
-def extract_domain_url(url: str) -> str:
-    return REGEX_DOMAIN_URL.match(url).group(1)
-
-
-def extract_domain_name(url: str) -> str:
-    return REGEX_DOMAIN_NAME.match(url).group(1)
-
-
-def generate_id() -> str:
-    """
-    Generate a unique identifier based on uuid4.
-
-    Returns
-    -------
-    str:
-        a unique identifier based on uuid4.
-
-    """
-    return str(uuid.uuid4())
 
 
 def load_json(file_path: str, encoding: str = "utf-8"):
