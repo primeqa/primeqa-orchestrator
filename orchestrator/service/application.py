@@ -344,7 +344,7 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
                     ANSWER.ATTR_END_CHAR_OFFSET.value: answer[
                         ANSWER.ATTR_END_CHAR_OFFSET.value
                     ],
-                    ANSWER.ATTR_CONFIDENCE.value: answer[ANSWER.ATTR_CONFIDENCE],
+                    ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
                     ANSWER.ATTR_CONTEXT_INDEX.value: answer[
                         ANSWER.ATTR_CONTEXT_INDEX.value
                     ],
