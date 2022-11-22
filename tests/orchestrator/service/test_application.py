@@ -234,7 +234,7 @@ class TestApplication:
             return_value=[
                 {
                     "text": "test answer text",
-                    "confidence_score": 1.0,
+                    "confidence": 1.0,
                     "start_char_offset": 0,
                     "end_char_offset": 1,
                     "context_index": 0,
@@ -377,7 +377,7 @@ class TestApplication:
             return_value=[
                 {
                     "text": "test answer text",
-                    "confidence_score": 1.0,
+                    "confidence": 1.0,
                     "start_char_offset": 0,
                     "end_char_offset": 1,
                     "context_index": 0,
