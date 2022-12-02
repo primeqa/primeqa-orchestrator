@@ -279,7 +279,11 @@ def retrieve(retriever: dict, index_id: str, query: str):
 def get_indexes(retriever_id: str):
     try:
         return [
-            {"collection_id": index.index_id, "name": index.index_id}
+            {
+                "collection_id": index.index_id,
+                "name": index.index_id,
+                "checkpoint": index.checkpoint
+            }
             for index in INDEXER_STUB.GetIndexes(GetIndexesRequest()).indexes
         ]
     except grpc.RpcError as rpc_error:
