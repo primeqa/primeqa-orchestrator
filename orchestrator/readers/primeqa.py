@@ -69,7 +69,7 @@ def scale(documents: List[dict], answers: List[dict], beta: float):
             ATTR_CONFIDENCE
         ]
         answer[ATTR_CONFIDENCE] = (
-            beta * answer[ATTR_CONFIDENCE] + (1 - beta) * document_confidence
+            beta * answer[ATTR_CONFIDENCE_SCORE] + (1 - beta) * document_confidence
         )
 
     return sorted(answers, key=lambda d: d[ATTR_CONFIDENCE], reverse=True)
