@@ -64,9 +64,6 @@ def scale(documents: List[dict], answers: List[dict], beta: float):
     -------
 
     """
-    # normalize answer scores
-    normalize(answers, field=ATTR_CONFIDENCE_SCORE)
-
     for answer in answers:
         document_confidence = documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]][
             ATTR_CONFIDENCE
