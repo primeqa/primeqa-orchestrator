@@ -42,7 +42,7 @@ def get_primeqa_retrievers(settings: dict):
     return get_retrievers_rpc()
 
 
-def get_collections_for_primeqa_retriever(retriever_id: str, settings: dict):
+def get_collections_for_primeqa_retriever(engine_type: str, settings: dict):
     # Step 1: Establish connection to PrimeQA service
     try:
         connect_primeqa_service(endpoint=settings[GENERIC.ATTR_SERVICE_ENDPOINT.value])
@@ -50,7 +50,7 @@ def get_collections_for_primeqa_retriever(retriever_id: str, settings: dict):
         raise Error(ErrorMessages.PRIMEQA_MISSING_SERVICE_ENDPOINT.value) from err
 
     # Step 2: Request collections for retriever
-    return get_indexes_rpc(retriever_id)
+    return get_indexes_rpc(engine_type)
 
 
 def retrieve_for_primeqa_retrievers(

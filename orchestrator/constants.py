@@ -54,6 +54,7 @@ ATTR_ANSWER_START = "answer_start"
 class RETRIEVER(str, Enum):
     ATTR_ID = "retriever_id"
     ATTR_PARAMETERS = "parameters"
+    ATTR_ENGINE_TYPE = "engine_type"
 
 
 class READER(str, Enum):

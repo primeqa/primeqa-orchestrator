@@ -81,7 +81,7 @@ class TestPrimeQARetrievers:
     def test_get_collections_for_primeqa_retriever_with_missing_service_endpoint(self):
         with pytest.raises(Error, match=ErrorMessages.PRIMEQA_MISSING_SERVICE_ENDPOINT):
             get_collections_for_primeqa_retriever(
-                retriever_id="test retriever", settings={}
+                engine_type="test retriever", settings={}
             )
 
     def test_get_collections_for_primeqa_retriever(
@@ -91,7 +91,7 @@ class TestPrimeQARetrievers:
         mock_primeqa_get_indexes_rpc,
     ):
         get_collections_for_primeqa_retriever(
-            retriever_id="test retriever", settings=mock_settings
+            engine_type="test retriever", settings=mock_settings
         )
         mock_connect_primeqa_service.assert_called_once_with("")
         mock_primeqa_get_indexes_rpc.assert_called_once_with("test retriever")

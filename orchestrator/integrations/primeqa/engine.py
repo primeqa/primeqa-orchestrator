@@ -27,6 +27,9 @@ from orchestrator.constants import (
     RETRIEVER,
     PARAMETER,
     ATTR_TEXT,
+    ATTR_COLLECTION_ID,
+    ATTR_NAME,
+    ATTR_DESCRIPTION,
 )
 from orchestrator.exceptions import Error, ErrorMessages
 
@@ -276,12 +279,30 @@ def retrieve(retriever: dict, index_id: str, query: str):
 # ------------------------------------------------------------------------------------------------
 #                               Indexer RPCs (PrimeQA gRPC Service)
 # ------------------------------------------------------------------------------------------------
-def get_indexes(retriever_id: str):
+def get_indexes(engine_type: str):
+    indexes = []
     try:
-        return [
-            {"collection_id": index.index_id, "name": index.index_id}
-            for index in INDEXER_STUB.GetIndexes(GetIndexesRequest()).indexes
-        ]
+        for index in INDEXER_STUB.GetIndexes(
+            GetIndexesRequest(engine_type=engine_type)
+        ).indexes:
+            index_information = {
+                ATTR_COLLECTION_ID: index.index_id,
+                ATTR_NAME: index.index_id,
+                ATTR_DESCRIPTION: "",
+            }
+            if index.metadata:
+                metadata = MessageToDict(
+                    index.metadata, preserving_proto_field_name=True
+                )
+                if ATTR_NAME in metadata and metadata[ATTR_NAME]:
+                    index_information[ATTR_NAME] = metadata[ATTR_NAME]
+
+                if ATTR_DESCRIPTION in metadata and metadata[ATTR_DESCRIPTION]:
+                    index_information[ATTR_DESCRIPTION] = metadata[ATTR_DESCRIPTION]
+
+            indexes.append(index_information)
+
+        return indexes
     except grpc.RpcError as rpc_error:
         if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error

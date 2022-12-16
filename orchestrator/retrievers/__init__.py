@@ -8,6 +8,7 @@ from orchestrator.constants import (
     PARAMETER,
     PRIMEQA,
     WATSON_DISCOVERY,
+    RETRIEVER,
     ATTR_PARAMETERS,
     ATTR_PROVENANCE,
     ATTR_SCORE,
@@ -111,7 +112,9 @@ def fetch_collections(retriever_id: str):
         and retriever_settings[PRIMEQA.ATTR_INTEGRATION_ID.value]
     ):
         return get_collections_for_primeqa_retriever(
-            retriever_id=retriever_id,
+            engine_type=retriever[RETRIEVER.ATTR_ENGINE_TYPE]
+            if RETRIEVER.ATTR_ENGINE_TYPE in retriever
+            else "",
             settings=retriever_settings[PRIMEQA.ATTR_INTEGRATION_ID.value],
         )
     else:
