@@ -52,6 +52,7 @@ from orchestrator.service.data_models import (
     Answer,
     GetDocumentsRequest,
     Retriever,
+    Collection,
     QuestionAnsweringRequest,
     Document,
     Feedback,
@@ -190,7 +191,7 @@ def get_retrievers():
 @app.get(
     "/retrievers/{retriever_id}/collections",
     status_code=status.HTTP_200_OK,
-    response_model=Union[List[Retriever], List[dict]],
+    response_model=Union[List[Collection], List[dict]],
     tags=["Retrieval"],
 )
 def get_retriever_collections(retriever_id: str):
@@ -410,9 +411,7 @@ def ask(qa_request: QuestionAnsweringRequest):
                             ANSWER.ATTR_END_CHAR_OFFSET.value: answer[
                                 ANSWER.ATTR_END_CHAR_OFFSET.value
                             ],
-                            ANSWER.ATTR_CONFIDENCE.value: answer[
-                                ATTR_CONFIDENCE
-                            ],
+                            ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
                             ANSWER.ATTR_CONTEXT_INDEX.value: answer[
                                 ANSWER.ATTR_CONTEXT_INDEX.value
                             ],

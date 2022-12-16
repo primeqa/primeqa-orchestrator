@@ -267,7 +267,7 @@ class TestPrimeQAIntegration:
             mock_RETRIEVER_STUB.Retrieve.assert_called_once()
 
     def test_get_indexes(self, mock_INDEXER_STUB):
-        get_indexes(retriever_id="test retriever")
+        get_indexes(engine_type="test retriever")
         mock_INDEXER_STUB.GetIndexes.assert_called_once()
 
     def test_get_indexes_with_connection_error(
@@ -275,7 +275,7 @@ class TestPrimeQAIntegration:
     ):
         mock_INDEXER_STUB.GetIndexes.side_effect = mock_grpc_connection_error
         with pytest.raises(Error, match=ErrorMessages.PRIMEQA_CONNECTION_ERROR.value):
-            get_indexes(retriever_id="test retriever")
+            get_indexes(engine_type="test retriever")
             mock_INDEXER_STUB.GetIndexes.assert_called_once()
 
     def test_get_indexes_with_invalid_argument_error(
@@ -288,7 +288,7 @@ class TestPrimeQAIntegration:
                 "MOCK ERROR"
             ).strip(),
         ):
-            get_indexes(retriever_id="test retriever")
+            get_indexes(engine_type="test retriever")
             mock_INDEXER_STUB.GetIndexes.assert_called_once()
 
     def test_get_indexes_with_unknown_error(
@@ -296,5 +296,5 @@ class TestPrimeQAIntegration:
     ):
         mock_INDEXER_STUB.GetIndexes.side_effect = mock_grpc_unknown_error
         with pytest.raises(Error, match=ErrorMessages.PRIMEQA_GENERIC_RPC_ERROR.value):
-            get_indexes(retriever_id="test retriever")
+            get_indexes(engine_type="test retriever")
             mock_INDEXER_STUB.GetIndexes.assert_called_once()
