@@ -17,6 +17,7 @@
 
 import logging
 from typing import List
+from itertools import zip_longest
 
 import grpc
 from google.protobuf.json_format import MessageToDict
@@ -181,18 +182,32 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
                 ],
             )
         ).query_answers:
+            print('engine get_answers context_answers', answers_for_query.context_answers)
+            print('engine get_answers per_query_response', answers_for_query.per_query_response)
             answers.append(
                 [
                     MessageToDict(
                         answer,
                         preserving_proto_field_name=True,
                         including_default_value_fields=True,
+                    ) 
+                    |
+                    (
+                        MessageToDict(
+                            per_query_response,
+                            preserving_proto_field_name=True,
+                            including_default_value_fields=True,
+                        ) if per_query_response is not None else 
+                            { 
+                                'question_type_prediction': None,
+                                'boolean_answer_prediction': None
+                            }
                     )
-                    for answers_per_context in answers_for_query.context_answers
+                    for answers_per_context, per_query_response in zip_longest(answers_for_query.context_answers, answers_for_query.per_query_response)
                     for answer in answers_per_context.answers
                 ]
             )
-
+        print('engine answers=', answers)
         return answers
     except grpc.RpcError as rpc_error:
         if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:

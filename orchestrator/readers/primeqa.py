@@ -106,4 +106,5 @@ def get_answers(
     except KeyError as err:
         raise Error(ErrorMessages.PRIMEQA_MISSING_SERVICE_ENDPOINT.value) from err
 
+    print('primeqa get_answers: ', answers)
     return answers

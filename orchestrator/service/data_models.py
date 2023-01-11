@@ -83,7 +83,8 @@ class Answer(BaseModel):
     start_char_offset: Union[int, None] = None
     end_char_offset: Union[int, None] = None
     context_index: Union[int, None] = None
-
+    question_type_prediction: Union[str, None] = None
+    boolean_answer_prediction: Union[str, None] = None
 
 #############################################################################################
 #                       Retrieval

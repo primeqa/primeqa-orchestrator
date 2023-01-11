@@ -67,7 +67,8 @@ class ANSWER(str, Enum):
     ATTR_END_CHAR_OFFSET = "end_char_offset"
     ATTR_CONFIDENCE = "confidence_score"
     ATTR_CONTEXT_INDEX = "context_index"
-
+    ATTR_QUESTION_TYPE = "question_type_prediction"
+    ATTR_BOOLEAN_ANSWER = "boolean_answer_prediction"
 
 class PARAMETER(str, Enum):
     ATTR_ID = "parameter_id"

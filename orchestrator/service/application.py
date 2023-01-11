@@ -333,7 +333,7 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
             ],
             parameters_with_updates=ga_request.reader.parameters,
         )
-
+        print('application get_answers_for_contexts:', answers)
         if answers:
             return [
                 {
@@ -348,6 +348,8 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
                     ANSWER.ATTR_CONTEXT_INDEX.value: answer[
                         ANSWER.ATTR_CONTEXT_INDEX.value
                     ],
+                    ANSWER.ATTR_QUESTION_TYPE.value: answer[ANSWER.ATTR_QUESTION_TYPE.value],
+                    ANSWER.ATTR_BOOLEAN_ANSWER.value: answer[ANSWER.ATTR_BOOLEAN_ANSWER.value]
                 }
                 for answer in answers
             ]
@@ -416,6 +418,8 @@ def ask(qa_request: QuestionAnsweringRequest):
                             ANSWER.ATTR_CONTEXT_INDEX.value: answer[
                                 ANSWER.ATTR_CONTEXT_INDEX.value
                             ],
+                            ANSWER.ATTR_QUESTION_TYPE.value: answer[ANSWER.ATTR_QUESTION_TYPE.value],
+                            ANSWER.ATTR_BOOLEAN_ANSWER.value: answer[ANSWER.ATTR_BOOLEAN_ANSWER.value]
                         },
                         ATTR_DOCUMENT: documents[
                             answer[ANSWER.ATTR_CONTEXT_INDEX.value]
