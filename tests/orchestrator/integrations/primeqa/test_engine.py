@@ -111,13 +111,15 @@ class TestPrimeQAIntegration:
             autospec=True,
         )
         mock_RetrieverStub = mocker.patch(
-            "orchestrator.integrations.primeqa.engine.RetrieverStub", autospec=True
+            "orchestrator.integrations.primeqa.engine.RetrievingServiceStub",
+            autospec=True,
         )
         mock_ReaderStub = mocker.patch(
-            "orchestrator.integrations.primeqa.engine.ReaderStub", autospec=True
+            "orchestrator.integrations.primeqa.engine.ReadingServiceStub", autospec=True
         )
         mock_IndexerStub = mocker.patch(
-            "orchestrator.integrations.primeqa.engine.IndexerStub", autospec=True
+            "orchestrator.integrations.primeqa.engine.IndexingServiceStub",
+            autospec=True,
         )
         connect_primeqa_service(endpoint="test endpoint")
         mock_grpc_insecure_channel.assert_called_once_with("test endpoint")
