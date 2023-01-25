@@ -1,5 +1,5 @@
 /**
- Copyright 2022 PrimeQA Team
+ Copyright 2022-2023 PrimeQA Team
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ package reader;
 /**
    The service for getting readers and answer(s) to a question usign readers
 */
-service Reader {
+service ReadingService {
     rpc GetReaders (GetReadersRequest) returns (GetReadersResponse);
     rpc GetAnswers (GetAnswersRequest) returns (GetAnswersResponse);
 }
 
-message ReaderComponent {
+message Reader {
     string reader_id = 1;
     repeated parameter.Parameter parameters = 2;
 }
@@ -36,7 +36,7 @@ message GetReadersRequest {
 }
 
 message GetReadersResponse {
-    repeated ReaderComponent readers = 1;
+    repeated Reader readers = 1;
 }
 
 /**
@@ -44,7 +44,7 @@ message GetReadersResponse {
     for each context text.
 */
 message GetAnswersRequest {
-    ReaderComponent reader = 1;
+    Reader reader = 1;
     repeated string queries = 2;
     repeated Contexts contexts = 3;
 }

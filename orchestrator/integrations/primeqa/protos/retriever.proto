@@ -1,5 +1,5 @@
 /**
- Copyright 2022 PrimeQA Team
+ Copyright 2022-2023 PrimeQA Team
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ package retrieve;
 /**
     Service to process and retrieve documents
 */
-service Retriever {
+service RetrievingService {
     rpc GetRetrievers(GetRetrieversRequest) returns (GetRetrieversResponse);
     rpc Retrieve(RetrieveRequest) returns (RetrieveResponse);
 }
 
-message RetrieverComponent {
+message Retriever {
     string retriever_id = 1;
     repeated parameter.Parameter parameters = 2;
     string engine_type = 3;
@@ -38,12 +38,12 @@ message GetRetrieversRequest {
 }
 
 message GetRetrieversResponse {
-    repeated RetrieverComponent retrievers = 1;
+    repeated Retriever retrievers = 1;
 }
 
 
 message RetrieveRequest {
-    RetrieverComponent retriever = 1;
+    Retriever retriever = 1;
     string index_id = 2; 
     repeated string queries = 3;
 }
