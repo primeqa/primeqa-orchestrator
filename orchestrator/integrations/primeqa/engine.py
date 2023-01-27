@@ -28,30 +28,35 @@ from orchestrator.constants import (
     RETRIEVER,
     PARAMETER,
     ATTR_TEXT,
+    ATTR_COLLECTION_ID,
+    ATTR_NAME,
+    ATTR_DESCRIPTION,
 )
 from orchestrator.exceptions import Error, ErrorMessages
 
 # PrimeQA-service gRPC connection
 from orchestrator.integrations.primeqa.grpc_generated.parameter_pb2 import Parameter
 from orchestrator.integrations.primeqa.grpc_generated.retriever_pb2_grpc import (
-    RetrieverStub,
+    RetrievingServiceStub,
 )
 from orchestrator.integrations.primeqa.grpc_generated.retriever_pb2 import (
     GetRetrieversRequest,
     RetrieveRequest,
-    RetrieverComponent,
+    Retriever,
 )
 
-from orchestrator.integrations.primeqa.grpc_generated.reader_pb2_grpc import ReaderStub
+from orchestrator.integrations.primeqa.grpc_generated.reader_pb2_grpc import (
+    ReadingServiceStub,
+)
 from orchestrator.integrations.primeqa.grpc_generated.reader_pb2 import (
     GetReadersRequest,
     GetAnswersRequest,
-    ReaderComponent,
+    Reader,
     Contexts,
 )
 
 from orchestrator.integrations.primeqa.grpc_generated.indexer_pb2_grpc import (
-    IndexerStub,
+    IndexingServiceStub,
 )
 from orchestrator.integrations.primeqa.grpc_generated.indexer_pb2 import (
     GetIndexesRequest,
@@ -129,9 +134,9 @@ def connect_primeqa_service(endpoint: str):
 
             # Open new channel
             CHANNEL = grpc.insecure_channel(endpoint)
-            RETRIEVER_STUB = RetrieverStub(CHANNEL)
-            READER_STUB = ReaderStub(CHANNEL)
-            INDEXER_STUB = IndexerStub(CHANNEL)
+            RETRIEVER_STUB = RetrievingServiceStub(CHANNEL)
+            READER_STUB = ReadingServiceStub(CHANNEL)
+            INDEXER_STUB = IndexingServiceStub(CHANNEL)
 
             # Set active endpoint
             ACTIVE_ENDPOINT = endpoint
@@ -167,7 +172,7 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
     try:
         for answers_for_query in READER_STUB.GetAnswers(
             GetAnswersRequest(
-                reader=ReaderComponent(
+                reader=Reader(
                     reader_id=reader[READER.ATTR_ID.value],
                     parameters=build_grpc_parameters(
                         reader[READER.ATTR_PARAMETERS.value]
@@ -253,7 +258,7 @@ def retrieve(retriever: dict, index_id: str, query: str):
         for document in (
             RETRIEVER_STUB.Retrieve(
                 RetrieveRequest(
-                    retriever=RetrieverComponent(
+                    retriever=Retriever(
                         retriever_id=retriever[RETRIEVER.ATTR_ID.value],
                         parameters=build_grpc_parameters(
                             retriever[RETRIEVER.ATTR_PARAMETERS.value]
@@ -291,12 +296,30 @@ def retrieve(retriever: dict, index_id: str, query: str):
 # ------------------------------------------------------------------------------------------------
 #                               Indexer RPCs (PrimeQA gRPC Service)
 # ------------------------------------------------------------------------------------------------
-def get_indexes(retriever_id: str):
+def get_indexes(engine_type: str):
+    indexes = []
     try:
-        return [
-            {"collection_id": index.index_id, "name": index.index_id}
-            for index in INDEXER_STUB.GetIndexes(GetIndexesRequest()).indexes
-        ]
+        for index in INDEXER_STUB.GetIndexes(
+            GetIndexesRequest(engine_type=engine_type)
+        ).indexes:
+            index_information = {
+                ATTR_COLLECTION_ID: index.index_id,
+                ATTR_NAME: index.index_id,
+                ATTR_DESCRIPTION: "",
+            }
+            if index.metadata:
+                metadata = MessageToDict(
+                    index.metadata, preserving_proto_field_name=True
+                )
+                if ATTR_NAME in metadata and metadata[ATTR_NAME]:
+                    index_information[ATTR_NAME] = metadata[ATTR_NAME]
+
+                if ATTR_DESCRIPTION in metadata and metadata[ATTR_DESCRIPTION]:
+                    index_information[ATTR_DESCRIPTION] = metadata[ATTR_DESCRIPTION]
+
+            indexes.append(index_information)
+
+        return indexes
     except grpc.RpcError as rpc_error:
         if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
             raise Error(ErrorMessages.PRIMEQA_CONNECTION_ERROR.value) from rpc_error
