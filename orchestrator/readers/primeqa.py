@@ -51,6 +51,9 @@ def add_combination_score(documents: List[dict], answers: List[dict], beta: floa
     """
     Add combination score in answers based on it's document's confidence and answer's score
 
+    **NOTE**: Answer must have "context_index" attribute in order to scale as per
+    document's confidence
+
     Parameters
     ----------
     documents: list
