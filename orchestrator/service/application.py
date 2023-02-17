@@ -117,29 +117,6 @@ def get_settings():
     return STORE.get_settings()
 
 
-@app.patch(
-    "/settings",
-    status_code=status.HTTP_200_OK,
-    response_model=dict,
-    tags=["Settings"],
-)
-def update_settings(updates: dict):
-    """
-    Update PrimeQA application settings.
-
-    Parameters
-    ----------
-    updates: dict
-        requested updates
-
-    Returns
-    -------
-    updated settings
-
-    """
-    return STORE.update_settings(updates)
-
-
 #############################################################################################
 #                           Retrieval APIs
 #############################################################################################

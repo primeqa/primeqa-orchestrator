@@ -42,14 +42,6 @@ class TestApplication:
         assert response.status_code == 200
         assert response.json() == mock_settings
 
-    def test_update_settings(self, client, mock_STORE):
-        mock_settings_update = {
-            "readers": {"PrimeQA": {"service_endpoint": "test endpoint"}}
-        }
-        response = client.patch("/settings", json=mock_settings_update)
-        assert response.status_code == 200
-        mock_STORE.update_settings.assert_called_once_with(mock_settings_update)
-
     def test_get_retrievers(self, client, mock_STORE):
         mock_STORE.get_settings.return_value = {"retrievers": {}}
         response = client.get("/retrievers")
