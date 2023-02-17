@@ -22,6 +22,11 @@ import grpc
 
 from orchestrator.constants import PARAMETER
 from orchestrator.exceptions import Error, ErrorMessages
+from orchestrator.constants import ATTR_NAME, ATTR_DESCRIPTION
+from orchestrator.integrations.primeqa.grpc_generated.indexer_pb2 import (
+    GetIndexesResponse,
+    IndexInformation,
+)
 from orchestrator.integrations.primeqa.engine import (
     build_grpc_parameters,
     connect_primeqa_service,
@@ -271,6 +276,26 @@ class TestPrimeQAIntegration:
     def test_get_indexes(self, mock_INDEXER_STUB):
         get_indexes(engine_type="test retriever")
         mock_INDEXER_STUB.GetIndexes.assert_called_once()
+
+    def test_get_indexes_return_index_with_metadata(self, mock_INDEXER_STUB):
+        mock_IndexInformation = IndexInformation()
+        mock_IndexInformation.index_id = "test index id"
+        mock_IndexInformation.metadata.update(
+            {
+                ATTR_NAME: "test index",
+                ATTR_DESCRIPTION: "test index description",
+            }
+        )
+        mock_INDEXER_STUB.GetIndexes.return_value = GetIndexesResponse(
+            indexes=[mock_IndexInformation]
+        )
+        indexes = get_indexes(engine_type="test retriever")
+        mock_INDEXER_STUB.GetIndexes.assert_called_once()
+        assert indexes[0] == {
+            "collection_id": "test index id",
+            ATTR_NAME: "test index",
+            ATTR_DESCRIPTION: "test index description",
+        }
 
     def test_get_indexes_with_connection_error(
         self, mock_INDEXER_STUB, mock_grpc_connection_error

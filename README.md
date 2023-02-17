@@ -20,7 +20,6 @@ limitations under the License.
 </div>
 <!-- END sphinx doc instructions - DO NOT MODIFY above code, please -->
 
-
 # Orchestrator REST Microservice
 
 This toolkit provides an orchestrator microservice that integrates PrimeQA's retriever & reader modules as a REST Server and also other "search" capabilities e.g. IBM Watson Discovery.
@@ -144,11 +143,9 @@ rm -rf security/certs/client/client.csr
 
 - Before first use, you will need to specify few neccessary configurations to connect to third-party depedencies. These setting are intentionally left blank for security purposes.
 
-- Open browser of choice (Mozilla Firefox/Google chorme) and visit `http://localhost:50059/docs`. This url shows available orchestrator APIs.
+- Go to `STORE_DIR` directory on your local machine and open `primeqa.json` file in that directory with an editor of your choice.
 
-- To **inspect** existing settings click on [GET] `/settings`. Once exapanded, click on `Try it out` button.
-
-- To **update** settings, Click on [PATCH] `/settings`. Once expanded, click on `Try it out` button and copy-paste following content in the request body section. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
+- You will need to add/ update `settings` portion in `primeqa.json` file. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
 
   a. For IBM® Watson Discovery based retriever, add/update `Watson Discovery` releated section in `retrievers`
 
@@ -165,7 +162,7 @@ rm -rf security/certs/client/client.csr
 
   ```json
       "PrimeQA": {
-          "service_endpoint": "<Primeqa Instance Endpoint>:50051"
+          "service_endpoint": "<Primeqa Instance Endpoint>:<Port>"
       }
   ```
 
@@ -173,7 +170,7 @@ rm -rf security/certs/client/client.csr
 
   ```json
       "PrimeQA": {
-          "service_endpoint": "<Primeqa Instance Endpoint>:50051",
+          "service_endpoint": "<Primeqa Instance Endpoint>:<Port>",
           "beta": 0.7
       }
   ```
@@ -192,17 +189,12 @@ rm -rf security/certs/client/client.csr
     },
     "readers": {
       "PrimeQA": {
-        "service_endpoint": "<Primeqa Instance Endpoint>:50051",
+        "service_endpoint": "<Primeqa Instance Endpoint>:<Port>",
         "beta": 0.7
       }
     }
   }
   ```
-
-- Click `Execute` button. You will see status code: 200 and updated setting once you scroll down.
-
-  **Example**:
-  ![Example](/static/primeqa_orchestrator_patch_settings.gif)
 
 <h3> 🧪 Testing </h3>
 
