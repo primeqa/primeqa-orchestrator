@@ -76,7 +76,7 @@ start_t = time.time()
 #############################################################################################
 app = FastAPI(
     title="PrimeQA Orchestrator Service",
-    version="0.0.1",
+    version="0.0.3",
     contact={
         "name": "PrimeQA Team",
         "url": "https://github.com/primeqa/primeqa",
@@ -206,6 +206,7 @@ def get_documents_for_question(gd_request: GetDocumentsRequest):
             retriever_id=gd_request.retriever.retriever_id,
             collection_id=gd_request.collection.collection_id,
             parameters_with_updates=gd_request.retriever.parameters,
+            should_normalize=False,
         )
 
         if documents:
@@ -213,7 +214,6 @@ def get_documents_for_question(gd_request: GetDocumentsRequest):
                 {
                     ATTR_TEXT: document[ATTR_TEXT],
                     ATTR_SCORE: document[ATTR_SCORE],
-                    ATTR_CONFIDENCE: document[ATTR_CONFIDENCE],
                     ATTR_DOCUMENT_ID: document[ATTR_DOCUMENT_ID]
                     if ATTR_DOCUMENT_ID in document
                     else None,
@@ -310,25 +310,39 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
                 for context in ga_request.contexts
             ],
             parameters_with_updates=ga_request.reader.parameters,
+            apply_score_combination=False,
         )
 
         if answers:
-            return [
-                {
-                    ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
-                    ANSWER.ATTR_START_CHAR_OFFSET.value: answer[
-                        ANSWER.ATTR_START_CHAR_OFFSET.value
-                    ],
-                    ANSWER.ATTR_END_CHAR_OFFSET.value: answer[
-                        ANSWER.ATTR_END_CHAR_OFFSET.value
-                    ],
-                    ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
-                    ANSWER.ATTR_CONTEXT_INDEX.value: answer[
+            response = []
+            for answer in answers:
+                # Populate mandatory fields
+                response.append(
+                    {
+                        ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
+                        ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
+                    }
+                )
+
+                # Add optional field ("context_index"), if present
+                if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
+                    response[-1][ANSWER.ATTR_CONTEXT_INDEX.value] = answer[
                         ANSWER.ATTR_CONTEXT_INDEX.value
-                    ],
-                }
-                for answer in answers
-            ]
+                    ]
+
+                # Add optional field ("start_char_offset"), only if present
+                if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
+                    response[-1][ANSWER.ATTR_START_CHAR_OFFSET.value] = answer[
+                        ANSWER.ATTR_START_CHAR_OFFSET.value
+                    ]
+
+                # Add optional field ("end_char_offset"), only if present
+                if ANSWER.ATTR_END_CHAR_OFFSET.value in answer:
+                    response[-1][ANSWER.ATTR_END_CHAR_OFFSET.value] = answer[
+                        ANSWER.ATTR_END_CHAR_OFFSET.value
+                    ]
+
+            return response
         else:
             return []
 
@@ -366,6 +380,7 @@ def ask(qa_request: QuestionAnsweringRequest):
             retriever_id=qa_request.retriever.retriever_id,
             collection_id=qa_request.collection.collection_id,
             parameters_with_updates=qa_request.retriever.parameters,
+            should_normalize=True,
         )
 
         # Step 2: Run reader
@@ -375,30 +390,45 @@ def ask(qa_request: QuestionAnsweringRequest):
                 reader_id=qa_request.reader.reader_id,
                 contexts=documents,
                 parameters_with_updates=qa_request.reader.parameters,
+                apply_score_combination=True,
             )
 
             if answers:
-                return [
-                    {
-                        ATTR_ANSWER: {
-                            ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
-                            ANSWER.ATTR_START_CHAR_OFFSET.value: answer[
-                                ANSWER.ATTR_START_CHAR_OFFSET.value
-                            ],
-                            ANSWER.ATTR_END_CHAR_OFFSET.value: answer[
-                                ANSWER.ATTR_END_CHAR_OFFSET.value
-                            ],
-                            ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
-                            ANSWER.ATTR_CONTEXT_INDEX.value: answer[
-                                ANSWER.ATTR_CONTEXT_INDEX.value
-                            ],
-                        },
-                        ATTR_DOCUMENT: documents[
+                response = []
+                for answer in answers:
+                    # Populate mandatory fields
+                    response.append(
+                        {
+                            ATTR_ANSWER: {
+                                ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
+                                ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
+                            }
+                        }
+                    )
+
+                    # Add optional field ("context_index"), if present
+                    if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_CONTEXT_INDEX.value
+                        ] = answer[ANSWER.ATTR_CONTEXT_INDEX.value]
+
+                        response[-1][ATTR_DOCUMENT] = documents[
                             answer[ANSWER.ATTR_CONTEXT_INDEX.value]
-                        ],
-                    }
-                    for answer in answers
-                ]
+                        ]
+
+                    # Add optional field ("start_char_offset"), only if present
+                    if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_START_CHAR_OFFSET.value
+                        ] = answer[ANSWER.ATTR_START_CHAR_OFFSET.value]
+
+                    # Add optional field ("end_char_offset"), only if present
+                    if ANSWER.ATTR_END_CHAR_OFFSET.value in answer:
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_END_CHAR_OFFSET.value
+                        ] = answer[ANSWER.ATTR_END_CHAR_OFFSET.value]
+
+                return response
 
         return []
 

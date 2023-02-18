@@ -30,6 +30,7 @@ from orchestrator.constants import (
     ATTR_COLLECTION_ID,
     ATTR_NAME,
     ATTR_DESCRIPTION,
+    ATTR_CONTEXT_INDEX,
 )
 from orchestrator.exceptions import Error, ErrorMessages
 
@@ -191,12 +192,19 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
                     MessageToDict(
                         answer,
                         preserving_proto_field_name=True,
-                        including_default_value_fields=True,
+                        including_default_value_fields=False,
                     )
                     for answers_per_context in answers_for_query.context_answers
                     for answer in answers_per_context.answers
                 ]
             )
+
+        # Re-adjust context indince to begin with zero, if present
+        # NOTE: "proto3" syntax uses "0" as a default value for scalars, hence context indices are offset by "1"
+        for answers_per_query in answers:
+            for answer in answers_per_query:
+                if ATTR_CONTEXT_INDEX in answer:
+                    answer[ATTR_CONTEXT_INDEX] = answer[ATTR_CONTEXT_INDEX] - 1
 
         return answers
     except grpc.RpcError as rpc_error:

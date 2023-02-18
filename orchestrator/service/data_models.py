@@ -96,8 +96,8 @@ class GetDocumentsRequest(BaseModel):
 
 class Document(BaseModel):
     text: str
-    confidence: float
     score: float
+    confidence: Union[float, None] = None
     document_id: Union[str, None] = None
     title: Union[str, None] = None
     url: Union[str, None] = None
@@ -115,7 +115,7 @@ class QuestionAnsweringRequest(BaseModel):
 
 class QuestionAnsweringResponse(BaseModel):
     answer: Answer
-    document: Document
+    document: Union[Document, None] = None
 
 
 #############################################################################################
