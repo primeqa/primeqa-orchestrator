@@ -126,6 +126,7 @@ def retrieve(
     retriever_id: str,
     collection_id: str,
     parameters_with_updates: Union[List[dict], None] = None,
+    should_normalize: bool = False,
 ) -> List[dict]:
     # Step 1: Verify non-empty query
     if not query:
@@ -180,10 +181,11 @@ def retrieve(
             settings=retriever_settings[WATSON_DISCOVERY.ATTR_INTEGRATION_ID.value],
         )
         # Normalize document scores
-        normalize(
-            documents,
-            field=ATTR_SCORE,
-        )
+        if should_normalize:
+            normalize(
+                documents,
+                field=ATTR_SCORE,
+            )
         return documents
     elif (
         retriever[ATTR_PROVENANCE] == PRIMEQA.ATTR_INTEGRATION_ID.value
@@ -197,10 +199,11 @@ def retrieve(
             settings=retriever_settings[PRIMEQA.ATTR_INTEGRATION_ID.value],
         )
         # Normalize document scores
-        normalize(
-            documents,
-            field=ATTR_SCORE,
-        )
+        if should_normalize:
+            normalize(
+                documents,
+                field=ATTR_SCORE,
+            )
         return documents
     else:
         return []

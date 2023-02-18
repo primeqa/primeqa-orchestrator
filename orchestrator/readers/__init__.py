@@ -70,6 +70,7 @@ def read(
     reader_id: str,
     contexts: List[dict],
     parameters_with_updates: List[dict],
+    apply_score_combination: bool = False,
 ) -> List[dict]:
     # Step 1: Verify non-empty query
     if not query:
@@ -123,6 +124,7 @@ def read(
             query=query,
             contexts=contexts,
             settings=reader_settings[PRIMEQA.ATTR_INTEGRATION_ID.value],
+            apply_score_combination=apply_score_combination,
         )
     else:
         return []

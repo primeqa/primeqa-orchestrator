@@ -47,9 +47,9 @@ def get_primeqa_readers(settings: dict):
     return get_readers_rpc()
 
 
-def scale(documents: List[dict], answers: List[dict], beta: float):
+def add_combination_score(documents: List[dict], answers: List[dict], beta: float):
     """
-    Scales answers based on it's document's confidence
+    Add combination score in answers based on it's document's confidence and answer's score
 
     Parameters
     ----------
@@ -65,12 +65,16 @@ def scale(documents: List[dict], answers: List[dict], beta: float):
 
     """
     for answer in answers:
-        document_confidence = documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]][
-            ATTR_CONFIDENCE
-        ]
-        answer[ATTR_CONFIDENCE] = (
-            beta * answer[ATTR_CONFIDENCE_SCORE] + (1 - beta) * document_confidence
-        )
+        # If "context_index" exists,
+        if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
+            document_confidence = documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]][
+                ATTR_CONFIDENCE
+            ]
+            answer[ATTR_CONFIDENCE] = (
+                beta * answer[ATTR_CONFIDENCE_SCORE] + (1 - beta) * document_confidence
+            )
+        else:
+            answer[ATTR_CONFIDENCE] = answer[ATTR_CONFIDENCE_SCORE]
 
     return sorted(answers, key=lambda d: d[ATTR_CONFIDENCE], reverse=True)
 
@@ -80,7 +84,8 @@ def get_answers(
     query: str,
     contexts: List[dict],
     settings: dict,
-):
+    apply_score_combination: bool = False,
+) -> List[dict]:
     answers = []
 
     # Step 1: Establish connection to PrimeQA service
@@ -91,15 +96,22 @@ def get_answers(
         # Step 1.b: Request answers
         answers_per_query = get_answers_rpc(reader, query, contexts)
 
-        # Step 1.c: Scale answers
-        answers = scale(
-            documents=contexts,
-            answers=answers_per_query[0],
-            beta=settings[GENERIC.ATTR_READERS_BETA.value]
-            if GENERIC.ATTR_READERS_BETA.value in settings
-            and settings[GENERIC.ATTR_READERS_BETA.value]
-            else 0.8,
-        )
+        # Step 1.c: Calculate score as combination of answers[confidence_score] and contexts[confidence], if requested
+        if apply_score_combination:
+            answers = add_combination_score(
+                documents=contexts,
+                answers=answers_per_query[0],
+                beta=settings[GENERIC.ATTR_READERS_BETA.value]
+                if GENERIC.ATTR_READERS_BETA.value in settings
+                and settings[GENERIC.ATTR_READERS_BETA.value]
+                else 0.8,
+            )
+        else:
+            answers = answers_per_query[0]
+            # Step 1.d: Add "confidence" field required for downstream processing
+            for answer in answers:
+                answer[ATTR_CONFIDENCE] = answer[ATTR_CONFIDENCE_SCORE]
+
     except IndexError:
         _logger.error(ErrorMessages.PRIMEQA_FAILED_TO_FIND_ANSWER.value.strip())
 

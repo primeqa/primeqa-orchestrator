@@ -84,6 +84,7 @@ class TestApplication:
             retriever_id="test retriever",
             collection_id="test collection",
             parameters_with_updates=None,
+            should_normalize=False,
         )
         assert response.status_code == 201
         assert response.json() == []
@@ -108,13 +109,14 @@ class TestApplication:
             retriever_id="test retriever",
             collection_id="test collection",
             parameters_with_updates=None,
+            should_normalize=False,
         )
         assert response.status_code == 201
         assert response.json() == [
             {
                 "text": "test document text",
-                "confidence": 1.0,
                 "score": 0.5,
+                "confidence": None,
                 "document_id": None,
                 "title": None,
                 "url": None,
@@ -246,6 +248,7 @@ class TestApplication:
             reader_id="test reader",
             contexts=[{"text": "test context", "confidence": 1.0}],
             parameters_with_updates=None,
+            apply_score_combination=False,
         )
         assert response.status_code == 201
         assert response.json() == [
@@ -276,6 +279,7 @@ class TestApplication:
             reader_id="test reader",
             contexts=[{"text": "test context", "confidence": 1.0}],
             parameters_with_updates=None,
+            apply_score_combination=False,
         )
         assert response.status_code == 201
         assert response.json() == []
@@ -347,12 +351,14 @@ class TestApplication:
             retriever_id="test retriever",
             collection_id="test collection",
             parameters_with_updates=None,
+            should_normalize=True,
         )
         mock_read.assert_called_once_with(
             query="test question",
             reader_id="test reader",
             contexts=[{"text": "test document text", "score": 0.5, "confidence": 1.0}],
             parameters_with_updates=None,
+            apply_score_combination=True,
         )
         assert response.status_code == 201
         assert response.json() == []
@@ -390,12 +396,14 @@ class TestApplication:
             retriever_id="test retriever",
             collection_id="test collection",
             parameters_with_updates=None,
+            should_normalize=True,
         )
         mock_read.assert_called_once_with(
             query="test question",
             reader_id="test reader",
             contexts=[{"text": "test document text", "score": 0.5, "confidence": 1.0}],
             parameters_with_updates=None,
+            apply_score_combination=True,
         )
         assert response.status_code == 201
         assert response.json() == [
