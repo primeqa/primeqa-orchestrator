@@ -99,8 +99,6 @@ class GENERIC(str, Enum):
     ATTR_SERVICE_ENDPOINT = "service_endpoint"
     ATTR_SERVICE_API_KEY = "service_api_key"
     ATTR_SERVICE_TOKEN = "service_token"
-    ATTR_SERVICE_USERNAME = "service_username"
-    ATTR_SERVICE_PASSWORD = "service_password"
 
     # Retrievers
     ATTR_RETRIEVERS = "retrievers"
