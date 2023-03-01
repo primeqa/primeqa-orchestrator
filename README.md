@@ -147,13 +147,7 @@ rm -rf security/certs/client/client.csr
 
 - You will need to add/update the `settings` portion in `primeqa.json` file. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
 
-  # a. To use a IBM® Watson Discovery based retriever, add/update `Watson Discovery` add the following to the list in the `retrievers` section.
-
-- Go to `STORE_DIR` directory on your local machine and open `primeqa.json` file in that directory with an editor of your choice.
-
-- You will need to add/ update `settings` portion in `primeqa.json` file. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
-
-  a. For IBM® Watson Discovery based retriever, add/update `Watson Discovery` releated section in `retrievers`
+  a. To use a IBM® Watson Discovery based retriever, add/update `Watson Discovery` add the following to the list in the `retrievers` section.
 
   ```json
       "Watson Discovery": {
@@ -202,6 +196,8 @@ rm -rf security/certs/client/client.csr
     }
   }
   ```
+
+  NOTE: The final scoring and ranking is done with a weighted sum of the Reader answer scores and Retriever search hits scores. The `beta` field is the weight assigned to the reader scores and `1-beta` is the weight assigned to the retriever scores.
 
 <h3> 🧪 Testing </h3>
 
