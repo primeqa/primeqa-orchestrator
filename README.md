@@ -143,16 +143,15 @@ rm -rf security/certs/client/client.csr
 
 - Before first use, you will need to specify few neccessary configurations to connect to third-party depedencies. These setting are intentionally left blank for security purposes.
 
-- Go to `STORE_DIR` directory on your local machine and open `primeqa.json` file in that directory with an editor of your choice.
+- Go to `STORE_DIR` directory on your local machine and copy the [primeqa.json](./data/primeqa.json) file in that directory.
 
-- You will need to add/ update `settings` portion in `primeqa.json` file. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
+- You will need to add/update the `settings` portion in `primeqa.json` file. Primarily add `service_endpoint` information (inclusive of port) for `PrimeQA` in `retriever` and `reader` sections in settings.
 
-  a. For IBM® Watson Discovery based retriever, add/update `Watson Discovery` releated section in `retrievers`
+  a. To use a IBM® Watson Discovery based retriever, add/update `Watson Discovery` add the following to the list in the `retrievers` section.
 
   ```json
       "Watson Discovery": {
           "service_endpoint": "<IBM® Watson Discovery Cloud/CP4D Instance Endpoint>",
-          "service_token": "<Bearer token (If using IBM® Watson Discovery CP4D Instance)>",
           "service_api_key": "<API key (If using IBM® Watson Discovery Cloud instance)>",
           "service_project_id": "<IBM® Watson Discovery Project ID>"
       }
@@ -175,17 +174,19 @@ rm -rf security/certs/client/client.csr
       }
   ```
 
-  For example, when IBM® Watson Discovery CP4D instance based retriever and PrimeQA based reader is used, the settings will look as follows
+  For example, to enable both `IBM® Watson Discovery` instance based retriever and `PrimeQA` based retrievers and `PrimeQA` based reader, the settings will look as follows
 
   ```json
   {
     "retrievers": {
       "Watson_Discovery": {
         "service_endpoint": "<IBM® Watson Discovery CP4D Instance Endpoint>",
-        "service_token": "<Bearer token>",
+        "service_api_key": "<API key (If using IBM® Watson Discovery Cloud instance)>",
         "service_project_id": "<IBM® Watson Discovery Project ID>"
       },
-      "alpha": 0.8
+      "PrimeQA": {
+          "service_endpoint": "<Primeqa Instance Endpoint>:<Port>"
+      }
     },
     "readers": {
       "PrimeQA": {
@@ -196,6 +197,8 @@ rm -rf security/certs/client/client.csr
   }
   ```
 
+  NOTE: The final scoring and ranking is done with a weighted sum of the Reader answer scores and Retriever search hits scores. The `beta` field is the weight assigned to the reader scores and `1-beta` is the weight assigned to the retriever scores.
+  
 <h3> 🧪 Testing </h3>
 
 1. To see all available retrievers, execute [GET] `/retrievers` endpoint

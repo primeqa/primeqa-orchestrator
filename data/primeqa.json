@@ -4,9 +4,10 @@
     "description": "PrimeQA is a public open source repository that enables researchers and developers to train state-of-the-art models for question answering (QA).",
     "settings": {
         "retrievers": {
-            "alpha": 0.8
         },
         "readers": {
+            "beta": 0.7
         }
+
     }
 }
