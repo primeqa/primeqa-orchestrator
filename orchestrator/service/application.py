@@ -44,6 +44,10 @@ from orchestrator.constants import (
     ATTR_URL,
     ATTR_ANSWERS,
     ATTR_ANSWER_START,
+    ATTR_START_CHAR_OFFSET,
+    ATTR_END_CHAR_OFFSET,
+    ATTR_CONFIDENCE,
+    ATTR_CONTEXT_INDEX
 )
 from orchestrator.service.data_models import (
     QuestionAnsweringResponse,
@@ -415,6 +419,16 @@ def ask(qa_request: QuestionAnsweringRequest):
                         response[-1][ATTR_DOCUMENT] = documents[
                             answer[ANSWER.ATTR_CONTEXT_INDEX.value]
                         ]
+                    else:
+                        attr_texts = [document[ATTR_TEXT] for document in documents]
+                        single_context = {
+                            ATTR_TEXT:  f"{len(documents)} Passages: \n" + "\n\n".join(attr_texts),
+                            ATTR_SCORE: 1,
+                            ATTR_CONFIDENCE: 1,
+                            ATTR_DOCUMENT_ID: None,
+                            ATTR_TITLE: None,
+                        }
+                        response[-1][ATTR_DOCUMENT] = single_context
 
                     # Add optional field ("start_char_offset"), only if present
                     if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
