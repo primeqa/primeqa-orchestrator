@@ -44,10 +44,7 @@ from orchestrator.constants import (
     ATTR_URL,
     ATTR_ANSWERS,
     ATTR_ANSWER_START,
-    ATTR_START_CHAR_OFFSET,
-    ATTR_END_CHAR_OFFSET,
     ATTR_CONFIDENCE,
-    ATTR_CONTEXT_INDEX,
 )
 from orchestrator.service.data_models import (
     QuestionAnsweringResponse,
