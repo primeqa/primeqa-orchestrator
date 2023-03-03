@@ -406,27 +406,7 @@ def ask(qa_request: QuestionAnsweringRequest):
                             }
                         }
                     )
-
-                    # Add optional field ("context_index"), if present
-                    if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_CONTEXT_INDEX.value
-                        ] = answer[ANSWER.ATTR_CONTEXT_INDEX.value]
-
-                        response[-1][ATTR_DOCUMENT] = documents[
-                            answer[ANSWER.ATTR_CONTEXT_INDEX.value]
-                        ]
-                    else:
-                        attr_texts = [document[ATTR_TEXT] for document in documents]
-                        single_context = {
-                            ATTR_TEXT:  f"{len(documents)} Passages: \n" + "\n\n".join(attr_texts),
-                            ATTR_SCORE: 1,
-                            ATTR_CONFIDENCE: 1,
-                            ATTR_DOCUMENT_ID: None,
-                            ATTR_TITLE: None,
-                        }
-                        response[-1][ATTR_DOCUMENT] = single_context
-
+                    
                     # Add optional field ("start_char_offset"), only if present
                     if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
                         response[-1][ATTR_ANSWER][
@@ -438,6 +418,35 @@ def ask(qa_request: QuestionAnsweringRequest):
                         response[-1][ATTR_ANSWER][
                             ANSWER.ATTR_END_CHAR_OFFSET.value
                         ] = answer[ANSWER.ATTR_END_CHAR_OFFSET.value]
+
+                    # Add optional field ("context_index"), if present
+                    if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_CONTEXT_INDEX.value
+                        ] = answer[ANSWER.ATTR_CONTEXT_INDEX.value]
+
+                        response[-1][ATTR_DOCUMENT] = documents[
+                            answer[ANSWER.ATTR_CONTEXT_INDEX.value]
+                        ]
+                    else:
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_START_CHAR_OFFSET.value
+                        ] = 1
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_END_CHAR_OFFSET.value
+                        ] = len(f"{len(documents)} Passages: ")
+                        response[-1][ATTR_ANSWER][
+                            ANSWER.ATTR_CONTEXT_INDEX.value
+                        ] = 0
+                        attr_texts = [document[ATTR_TEXT] for document in documents]
+                        single_context = {
+                            ATTR_TEXT:  f" {len(documents)} Retrieved Passages: \n" + "\n\n".join(attr_texts),
+                            ATTR_SCORE: 1,
+                            ATTR_CONFIDENCE: 1,
+                            ATTR_DOCUMENT_ID: None,
+                            ATTR_TITLE: None,
+                        }
+                        response[-1][ATTR_DOCUMENT] = single_context
 
                 return response
 
