@@ -425,13 +425,13 @@ def ask(qa_request: QuestionAnsweringRequest):
                             ANSWER.ATTR_CONTEXT_INDEX.value
                         ] = answer[ANSWER.ATTR_CONTEXT_INDEX.value]
 
-                        response[-1][ATTR_DOCUMENT] = documents[
-                            answer[ANSWER.ATTR_CONTEXT_INDEX.value]
+                        response[-1][ATTR_DOCUMENT] = [
+                            documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]]
                         ]
                     else:
                         response[-1][ATTR_ANSWER][
                             ANSWER.ATTR_START_CHAR_OFFSET.value
-                        ] = 1
+                        ] = 0
                         response[-1][ATTR_ANSWER][
                             ANSWER.ATTR_END_CHAR_OFFSET.value
                         ] = len(f"{len(documents)} Passages: ")

@@ -115,7 +115,7 @@ class QuestionAnsweringRequest(BaseModel):
 
 class QuestionAnsweringResponse(BaseModel):
     answer: Answer
-    document: Union[Document, None] = None
+    document: Union[List[Document], None] = None
 
 
 #############################################################################################
