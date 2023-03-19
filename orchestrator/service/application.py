@@ -33,9 +33,12 @@ from orchestrator.constants import (
     FEEDBACK_RESPONSE_FORMAT,
     GENERIC,
     ANSWER,
+    EVIDENCE,
+    OFFSET,
+    EVIDENCE_TYPES,
+    TEXT_EVIDENCE,
+    DOCUMENT_EVIDENCE,
     ATTR_ID,
-    ATTR_ANSWER,
-    ATTR_DOCUMENT,
     ATTR_TEXT,
     ATTR_SCORE,
     ATTR_CONFIDENCE,
@@ -44,10 +47,9 @@ from orchestrator.constants import (
     ATTR_URL,
     ATTR_ANSWERS,
     ATTR_ANSWER_START,
-    ATTR_CONFIDENCE,
+    ATTR_DOCUMENTS,
 )
 from orchestrator.service.data_models import (
-    QuestionAnsweringResponse,
     Reader,
     GetAnswersRequest,
     Answer,
@@ -55,6 +57,7 @@ from orchestrator.service.data_models import (
     Retriever,
     Collection,
     QuestionAnsweringRequest,
+    QuestionAnsweringResponse,
     Document,
     Feedback,
     FeedbackInPrimeQAFormat,
@@ -199,6 +202,7 @@ def get_retriever_collections(retriever_id: str):
     status_code=status.HTTP_201_CREATED,
     response_model=List[Document],
     tags=["Retrieval"],
+    response_model_exclude_none=True,
 )
 def get_documents_for_question(gd_request: GetDocumentsRequest):
     try:
@@ -300,6 +304,7 @@ def get_readers():
     status_code=status.HTTP_201_CREATED,
     response_model=List[Answer],
     tags=["Reading"],
+    response_model_exclude_none=True,
 )
 def get_answers_for_contexts(ga_request: GetAnswersRequest):
     try:
@@ -325,24 +330,50 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
                     }
                 )
 
-                # Add optional field ("context_index"), if present
-                if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
-                    response[-1][ANSWER.ATTR_CONTEXT_INDEX.value] = answer[
-                        ANSWER.ATTR_CONTEXT_INDEX.value
-                    ]
+                # Add optional field ("evidences"), if present
+                if ANSWER.ATTR_EVIDENCES.value in answer:
+                    evidences = []
+                    for entry in answer[ANSWER.ATTR_EVIDENCES.value]:
+                        # Create single "evidence" instance
+                        evidence = {
+                            TEXT_EVIDENCE.ATTR_EVIDENCE_TYPE.value: EVIDENCE_TYPES.TEXT.value
+                        }
 
-                # Add optional field ("start_char_offset"), only if present
-                if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
-                    response[-1][ANSWER.ATTR_START_CHAR_OFFSET.value] = answer[
-                        ANSWER.ATTR_START_CHAR_OFFSET.value
-                    ]
+                        # Add optional field ("context_index") to evidence, if present
+                        if EVIDENCE.ATTR_CONTEXT_INDEX.value in entry:
+                            evidence[
+                                TEXT_EVIDENCE.ATTR_TEXT.value
+                            ] = ga_request.contexts[
+                                entry[EVIDENCE.ATTR_CONTEXT_INDEX.value] - 1
+                            ]
+                        # Add optional field ("text") to evidence, only if "context_index" is abscent and "text" is present
+                        elif EVIDENCE.ATTR_TEXT.value in entry:
+                            evidence[TEXT_EVIDENCE.ATTR_TEXT.value] = entry[
+                                EVIDENCE.ATTR_TEXT.value
+                            ]
 
-                # Add optional field ("end_char_offset"), only if present
-                if ANSWER.ATTR_END_CHAR_OFFSET.value in answer:
-                    response[-1][ANSWER.ATTR_END_CHAR_OFFSET.value] = answer[
-                        ANSWER.ATTR_END_CHAR_OFFSET.value
-                    ]
+                        # Add optional field ("offsets") to evidence, if present
+                        if (
+                            EVIDENCE.ATTR_OFFSETS.value in entry
+                            and entry[EVIDENCE.ATTR_OFFSETS.value]
+                        ):
+                            evidence[EVIDENCE.ATTR_OFFSETS.value] = [
+                                {
+                                    OFFSET.ATTR_START.value: offset[
+                                        OFFSET.ATTR_START.value
+                                    ],
+                                    OFFSET.ATTR_END.value: offset[
+                                        OFFSET.ATTR_END.value
+                                    ],
+                                }
+                                for offset in entry[EVIDENCE.ATTR_OFFSETS.value]
+                            ]
 
+                        # Add filled "evidence" instance to list of "evidences"
+                        evidences.append(evidence)
+
+                    if evidences:
+                        response[-1][ANSWER.ATTR_EVIDENCES.value] = evidences
             return response
         else:
             return []
@@ -370,8 +401,9 @@ def get_answers_for_contexts(ga_request: GetAnswersRequest):
 @app.post(
     "/ask",
     status_code=status.HTTP_201_CREATED,
-    response_model=List[QuestionAnsweringResponse],
+    response_model=QuestionAnsweringResponse,
     tags=["Question Answering (QA)"],
+    response_model_exclude_none=True,
 )
 def ask(qa_request: QuestionAnsweringRequest):
     try:
@@ -395,61 +427,104 @@ def ask(qa_request: QuestionAnsweringRequest):
             )
 
             if answers:
-                response = []
+                response = {ATTR_ANSWERS: [], ATTR_DOCUMENTS: documents}
                 for answer in answers:
                     # Populate mandatory fields
-                    response.append(
+                    response[ATTR_ANSWERS].append(
                         {
-                            ATTR_ANSWER: {
-                                ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
-                                ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
-                            }
+                            ANSWER.ATTR_TEXT.value: answer[ATTR_TEXT],
+                            ANSWER.ATTR_CONFIDENCE.value: answer[ATTR_CONFIDENCE],
                         }
                     )
 
-                    # Add optional field ("start_char_offset"), only if present
-                    if ANSWER.ATTR_START_CHAR_OFFSET.value in answer:
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_START_CHAR_OFFSET.value
-                        ] = answer[ANSWER.ATTR_START_CHAR_OFFSET.value]
+                    # Add optional field ("evidences"), if present
+                    if ANSWER.ATTR_EVIDENCES.value in answer:
+                        evidences = []
+                        for entry in answer[ANSWER.ATTR_EVIDENCES.value]:
+                            # Create single "evidence" instance
+                            evidence = {}
 
-                    # Add optional field ("end_char_offset"), only if present
-                    if ANSWER.ATTR_END_CHAR_OFFSET.value in answer:
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_END_CHAR_OFFSET.value
-                        ] = answer[ANSWER.ATTR_END_CHAR_OFFSET.value]
+                            # If "context_index" is present, form "DocumentEvidence" object
+                            if EVIDENCE.ATTR_CONTEXT_INDEX.value in entry:
+                                evidence_document = documents[
+                                    entry[EVIDENCE.ATTR_CONTEXT_INDEX.value]
+                                ]
 
-                    # Add optional field ("context_index"), if present
-                    if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_CONTEXT_INDEX.value
-                        ] = answer[ANSWER.ATTR_CONTEXT_INDEX.value]
+                                # Add mandatory fields
+                                evidence[
+                                    DOCUMENT_EVIDENCE.ATTR_EVIDENCE_TYPE.value
+                                ] = EVIDENCE_TYPES.DOCUMENT.value
+                                evidence[
+                                    DOCUMENT_EVIDENCE.ATTR_TEXT.value
+                                ] = evidence_document[ATTR_TEXT]
+                                evidence[
+                                    DOCUMENT_EVIDENCE.ATTR_SCORE.value
+                                ] = evidence_document[ATTR_SCORE]
 
-                        response[-1][ATTR_DOCUMENT] = [
-                            documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]]
-                        ]
-                    else:
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_START_CHAR_OFFSET.value
-                        ] = 0
-                        response[-1][ATTR_ANSWER][
-                            ANSWER.ATTR_END_CHAR_OFFSET.value
-                        ] = len(f"{len(documents)} Passages: ")
-                        response[-1][ATTR_ANSWER][ANSWER.ATTR_CONTEXT_INDEX.value] = 0
-                        attr_texts = [document[ATTR_TEXT] for document in documents]
-                        single_context = {
-                            ATTR_TEXT: f" {len(documents)} Retrieved Passages: \n"
-                            + "\n\n".join(attr_texts),
-                            ATTR_SCORE: 1,
-                            ATTR_CONFIDENCE: 1,
-                            ATTR_DOCUMENT_ID: None,
-                            ATTR_TITLE: None,
-                        }
-                        response[-1][ATTR_DOCUMENT] = single_context
+                                # Add optional fields
+                                if ATTR_DOCUMENT_ID in evidence_document:
+                                    evidence[
+                                        DOCUMENT_EVIDENCE.ATTR_DOCUMENT_ID.value
+                                    ] = evidence_document[ATTR_DOCUMENT_ID]
+
+                                if ATTR_TITLE in evidence_document:
+                                    evidence[
+                                        DOCUMENT_EVIDENCE.ATTR_TITLE.value
+                                    ] = evidence_document[ATTR_TITLE]
+
+                                if ATTR_URL in evidence_document:
+                                    evidence[
+                                        DOCUMENT_EVIDENCE.ATTR_URL.value
+                                    ] = evidence_document[ATTR_URL]
+                            elif (
+                                EVIDENCE.ATTR_TEXT.value in entry
+                                and entry[EVIDENCE.ATTR_TEXT.value]
+                            ):
+                                # Add mandatory fields
+                                evidence[
+                                    TEXT_EVIDENCE.ATTR_EVIDENCE_TYPE.value
+                                ] = EVIDENCE_TYPES.TEXT.value
+                                evidence[TEXT_EVIDENCE.ATTR_TEXT.value] = entry[
+                                    ATTR_TEXT
+                                ]
+
+                            # Add optional field ("offsets") to evidence, if present
+                            try:
+                                if (
+                                    EVIDENCE.ATTR_OFFSETS.value in entry
+                                    and entry[EVIDENCE.ATTR_OFFSETS.value]
+                                ):
+                                    evidence[EVIDENCE.ATTR_OFFSETS.value] = [
+                                        {
+                                            OFFSET.ATTR_START.value: offset[
+                                                OFFSET.ATTR_START.value
+                                            ],
+                                            OFFSET.ATTR_END.value: offset[
+                                                OFFSET.ATTR_END.value
+                                            ],
+                                        }
+                                        for offset in entry[EVIDENCE.ATTR_OFFSETS.value]
+                                    ]
+                            except KeyError:
+                                _logger.warning(
+                                    "Failed to add all offset fields for evidence: %s",
+                                    entry,
+                                )
+
+                            # Add filled "evidence" instance to list of "evidences"
+                            if evidence:
+                                evidences.append(evidence)
+
+                        if evidences:
+                            response[ATTR_ANSWERS][-1][
+                                ANSWER.ATTR_EVIDENCES.value
+                            ] = evidences
 
                 return response
 
-        return []
+            else:
+                return {ATTR_DOCUMENTS: documents}
+        return {}
 
     except Error as err:
         error_message = err.args[0]

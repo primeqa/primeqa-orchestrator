@@ -18,7 +18,7 @@
 from typing import List, Dict, Union, Literal
 from pydantic import BaseModel
 
-from orchestrator.constants import PARAMETER
+from orchestrator.constants import PARAMETER, EVIDENCE_TYPES
 
 
 #############################################################################################
@@ -39,6 +39,42 @@ class Parameter(BaseModel):
     value: Union[int, float, bool, str, None]
     options: Union[List[bool], List[str], None] = None
     range: Union[List[int], List[float], None] = None
+
+
+#############################################################################################
+#                       Document
+#############################################################################################
+class Document(BaseModel):
+    text: str
+    score: float
+    confidence: Union[float, None] = None
+    document_id: Union[str, None] = None
+    title: Union[str, None] = None
+    url: Union[str, None] = None
+
+
+#############################################################################################
+#                       Evidence
+#############################################################################################
+class Offset(BaseModel):
+    start: int
+    end: int
+
+
+class DocumentEvidence(BaseModel):
+    evidence_type: str = EVIDENCE_TYPES.DOCUMENT.value
+    text: str
+    score: float
+    document_id: Union[str, None] = None
+    title: Union[str, None] = None
+    url: Union[str, None] = None
+    offsets: Union[List[Offset], None] = None
+
+
+class TextEvidence(BaseModel):
+    evidence_type: str = EVIDENCE_TYPES.TEXT.value
+    text: str
+    offsets: Union[List[Offset], None] = None
 
 
 #############################################################################################
@@ -71,6 +107,8 @@ class Collection(BaseModel):
 #############################################################################################
 #                       Reading
 #############################################################################################
+
+
 class GetAnswersRequest(BaseModel):
     question: str
     contexts: List[str]
@@ -80,9 +118,7 @@ class GetAnswersRequest(BaseModel):
 class Answer(BaseModel):
     text: str
     confidence_score: float
-    start_char_offset: Union[int, None] = None
-    end_char_offset: Union[int, None] = None
-    context_index: Union[int, None] = None
+    evidences: Union[List[DocumentEvidence], List[TextEvidence], None] = None
 
 
 #############################################################################################
@@ -92,15 +128,6 @@ class GetDocumentsRequest(BaseModel):
     question: str
     retriever: Retriever
     collection: Collection
-
-
-class Document(BaseModel):
-    text: str
-    score: float
-    confidence: Union[float, None] = None
-    document_id: Union[str, None] = None
-    title: Union[str, None] = None
-    url: Union[str, None] = None
 
 
 #############################################################################################
@@ -114,8 +141,8 @@ class QuestionAnsweringRequest(BaseModel):
 
 
 class QuestionAnsweringResponse(BaseModel):
-    answer: Answer
-    document: Union[List[Document], None] = None
+    answers: Union[List[Answer], None] = None
+    documents: Union[List[Document], None] = None
 
 
 #############################################################################################
