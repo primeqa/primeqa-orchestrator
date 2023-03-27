@@ -26,6 +26,8 @@ from orchestrator.constants import (
     READER,
     RETRIEVER,
     PARAMETER,
+    ANSWER,
+    EVIDENCE,
     ATTR_TEXT,
     ATTR_COLLECTION_ID,
     ATTR_NAME,
@@ -192,7 +194,7 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
                     MessageToDict(
                         answer,
                         preserving_proto_field_name=True,
-                        including_default_value_fields=False,
+                        including_default_value_fields=True,
                     )
                     for answers_per_context in answers_for_query.context_answers
                     for answer in answers_per_context.answers
@@ -203,8 +205,15 @@ def get_answers(reader: dict, query: str, documents: List[dict]):
         # NOTE: "proto3" syntax uses "0" as a default value for scalars, hence context indices are offset by "1"
         for answers_per_query in answers:
             for answer in answers_per_query:
-                if ATTR_CONTEXT_INDEX in answer:
-                    answer[ATTR_CONTEXT_INDEX] = answer[ATTR_CONTEXT_INDEX] - 1
+                if (
+                    ANSWER.ATTR_EVIDENCES.value in answer
+                    and answer[ANSWER.ATTR_EVIDENCES.value]
+                ):
+                    for evidence in answer[ANSWER.ATTR_EVIDENCES.value]:
+                        if EVIDENCE.ATTR_CONTEXT_INDEX.value in evidence:
+                            evidence[EVIDENCE.ATTR_CONTEXT_INDEX.value] = (
+                                evidence[EVIDENCE.ATTR_CONTEXT_INDEX.value] - 1
+                            )
 
         return answers
     except grpc.RpcError as rpc_error:

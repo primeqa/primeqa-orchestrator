@@ -17,15 +17,16 @@
 
 import logging
 from typing import List
+from statistics import fmean
 
 from orchestrator.exceptions import Error, ErrorMessages
 from orchestrator.constants import (
     GENERIC,
     ANSWER,
+    EVIDENCE,
     ATTR_CONFIDENCE_SCORE,
     ATTR_CONFIDENCE,
 )
-from orchestrator.utils import normalize
 from orchestrator.integrations.primeqa import (
     connect_primeqa_service,
     get_readers as get_readers_rpc,
@@ -51,6 +52,9 @@ def add_combination_score(documents: List[dict], answers: List[dict], beta: floa
     """
     Add combination score in answers based on it's document's confidence and answer's score
 
+    **NOTE**: Answer must have "context_index" attribute in order to scale as per
+    document's confidence
+
     Parameters
     ----------
     documents: list
@@ -65,14 +69,31 @@ def add_combination_score(documents: List[dict], answers: List[dict], beta: floa
 
     """
     for answer in answers:
-        # If "context_index" exists,
-        if ANSWER.ATTR_CONTEXT_INDEX.value in answer:
-            document_confidence = documents[answer[ANSWER.ATTR_CONTEXT_INDEX.value]][
-                ATTR_CONFIDENCE
-            ]
-            answer[ATTR_CONFIDENCE] = (
-                beta * answer[ATTR_CONFIDENCE_SCORE] + (1 - beta) * document_confidence
-            )
+        # If "evidence" exits,
+        if (
+            ANSWER.ATTR_EVIDENCES.value in answer
+            and answer[ANSWER.ATTR_EVIDENCES.value]
+        ):
+            try:
+                document_confidence = fmean(
+                    [
+                        documents[evidence[EVIDENCE.ATTR_CONTEXT_INDEX.value]][
+                            ATTR_CONFIDENCE
+                        ]
+                        for evidence in answer[ANSWER.ATTR_EVIDENCES.value]
+                    ]
+                )
+
+                answer[ATTR_CONFIDENCE] = (
+                    beta * answer[ATTR_CONFIDENCE_SCORE]
+                    + (1 - beta) * document_confidence
+                )
+            except IndexError:
+                _logger.warning(
+                    "Failed to locate relevant context to compute combination score for answer: %s",
+                    answer,
+                )
+                answer[ATTR_CONFIDENCE] = answer[ATTR_CONFIDENCE_SCORE]
         else:
             answer[ATTR_CONFIDENCE] = answer[ATTR_CONFIDENCE_SCORE]
 

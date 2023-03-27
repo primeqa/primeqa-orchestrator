@@ -112,16 +112,7 @@ class TestApplication:
             should_normalize=False,
         )
         assert response.status_code == 201
-        assert response.json() == [
-            {
-                "text": "test document text",
-                "score": 0.5,
-                "confidence": None,
-                "document_id": None,
-                "title": None,
-                "url": None,
-            }
-        ]
+        assert response.json() == [{"text": "test document text", "score": 0.5}]
 
     def test_get_documents_for_question_with_empty_question(self, client):
         response = client.post(
@@ -229,9 +220,13 @@ class TestApplication:
                 {
                     "text": "test answer text",
                     "confidence": 1.0,
-                    "start_char_offset": 0,
-                    "end_char_offset": 1,
-                    "context_index": 0,
+                    "evidences": [
+                        {
+                            "evidence_type": "text",
+                            "text": "test",
+                            "offsets": [{"start": 1, "end": 2}],
+                        }
+                    ],
                 }
             ],
         )
@@ -255,9 +250,13 @@ class TestApplication:
             {
                 "text": "test answer text",
                 "confidence_score": 1.0,
-                "start_char_offset": 0,
-                "end_char_offset": 1,
-                "context_index": 0,
+                "evidences": [
+                    {
+                        "evidence_type": "text",
+                        "text": "test",
+                        "offsets": [{"start": 1, "end": 2}],
+                    }
+                ],
             }
         ]
 
@@ -361,7 +360,11 @@ class TestApplication:
             apply_score_combination=True,
         )
         assert response.status_code == 201
-        assert response.json() == []
+        assert response.json() == {
+            "documents": [
+                {"text": "test document text", "score": 0.5, "confidence": 1.0}
+            ]
+        }
 
     def test_ask(self, client, mocker):
         mock_retrieve = mocker.patch(
@@ -376,9 +379,13 @@ class TestApplication:
                 {
                     "text": "test answer text",
                     "confidence": 1.0,
-                    "start_char_offset": 0,
-                    "end_char_offset": 1,
-                    "context_index": 0,
+                    "evidences": [
+                        {
+                            "evidence_type": "text",
+                            "text": "test",
+                            "offsets": [{"start": 1, "end": 2}],
+                        }
+                    ],
                 }
             ],
         )
@@ -406,25 +413,28 @@ class TestApplication:
             apply_score_combination=True,
         )
         assert response.status_code == 201
-        assert response.json() == [
-            {
-                "answer": {
+        assert response.json() == {
+            "answers": [
+                {
                     "text": "test answer text",
                     "confidence_score": 1.0,
-                    "start_char_offset": 0,
-                    "end_char_offset": 1,
-                    "context_index": 0,
-                },
-                "document": {
+                    "evidences": [
+                        {
+                            "evidence_type": "text",
+                            "text": "test",
+                            "offsets": [{"start": 1, "end": 2}],
+                        }
+                    ],
+                }
+            ],
+            "documents": [
+                {
                     "text": "test document text",
                     "score": 0.5,
                     "confidence": 1.0,
-                    "document_id": None,
-                    "title": None,
-                    "url": None,
-                },
-            }
-        ]
+                }
+            ],
+        }
 
     def test_get_feedback(self, client, mock_STORE):
         mock_STORE.get_feedbacks.return_value = []

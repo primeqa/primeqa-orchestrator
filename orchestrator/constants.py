@@ -28,7 +28,7 @@ ATTR_APPLICATION_ID = "application_id"
 ATTR_COLLECTION_ID = "collection_id"
 ATTR_CONTEXT_INDEX = "context_index"
 ATTR_PARAMETER_ID = "parameter_id"
-ATTR_DOCUMENT = "document"
+ATTR_DOCUMENTS = "documents"
 ATTR_ID = "id"
 ATTR_DOCUMENT_ID = "document_id"
 ATTR_NAME = "name"
@@ -45,9 +45,6 @@ ATTR_CONFIDENCE_SCORE = "confidence_score"
 ATTR_CONFIDENCE = "confidence"
 ATTR_QUESTION = "question"
 ATTR_ANSWERS = "answers"
-ATTR_ANSWER = "answer"
-ATTR_START_CHAR_OFFSET = "start_char_offset"
-ATTR_END_CHAR_OFFSET = "end_char_offset"
 ATTR_ANSWER_START = "answer_start"
 
 
@@ -62,12 +59,42 @@ class READER(str, Enum):
     ATTR_PARAMETERS = "parameters"
 
 
+class EVIDENCE_TYPES(str, Enum):
+    TEXT = "text"
+    DOCUMENT = "document"
+
+
+class TEXT_EVIDENCE(str, Enum):
+    ATTR_EVIDENCE_TYPE = "evidence_type"
+    ATTR_TEXT = "text"
+    ATTR_OFFSETS = "offsets"
+
+
+class DOCUMENT_EVIDENCE(str, Enum):
+    ATTR_EVIDENCE_TYPE = "evidence_type"
+    ATTR_TEXT = "text"
+    ATTR_SCORE = "score"
+    ATTR_DOCUMENT_ID = "document_id"
+    ATTR_TITLE = "title"
+    ATTR_URL = "url"
+    ATTR_OFFSETS = "offsets"
+
+
+class OFFSET(str, Enum):
+    ATTR_START = "start"
+    ATTR_END = "end"
+
+
+class EVIDENCE(str, Enum):
+    ATTR_CONTEXT_INDEX = "context_index"
+    ATTR_TEXT = "text"
+    ATTR_OFFSETS = "offsets"
+
+
 class ANSWER(str, Enum):
     ATTR_TEXT = "text"
-    ATTR_START_CHAR_OFFSET = "start_char_offset"
-    ATTR_END_CHAR_OFFSET = "end_char_offset"
     ATTR_CONFIDENCE = "confidence_score"
-    ATTR_CONTEXT_INDEX = "context_index"
+    ATTR_EVIDENCES = "evidences"
 
 
 class PARAMETER(str, Enum):

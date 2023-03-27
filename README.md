@@ -185,7 +185,7 @@ rm -rf security/certs/client/client.csr
         "service_project_id": "<IBM® Watson Discovery Project ID>"
       },
       "PrimeQA": {
-          "service_endpoint": "<Primeqa Instance Endpoint>:<Port>"
+        "service_endpoint": "<Primeqa Instance Endpoint>:<Port>"
       }
     },
     "readers": {
@@ -198,7 +198,7 @@ rm -rf security/certs/client/client.csr
   ```
 
   NOTE: The final scoring and ranking is done with a weighted sum of the Reader answer scores and Retriever search hits scores. The `beta` field is the weight assigned to the reader scores and `1-beta` is the weight assigned to the retriever scores.
-  
+
 <h3> 🧪 Testing </h3>
 
 1. To see all available retrievers, execute [GET] `/retrievers` endpoint
