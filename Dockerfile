@@ -64,7 +64,8 @@ RUN python setup.py bdist_wheel --python-tag py3
 
 FROM python-base as base
 
-RUN apt update && \
+RUN chmod 0777 /tmp && \
+    apt update && \
     DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" \
     apt install -y ca-certificates tini && \
     rm -rf /var/lib/apt/lists
