@@ -118,5 +118,8 @@ RUN mkdir -p ${STORE_DIR} && chmod -R 777 ${STORE_DIR}
 # Set default run command
 CMD ["tini","run_orchestrator"]
 
+# needed to mitigate CVE-2023-0361
+RUN apt install libgnutls30>=3.7.1-5+deb11u3
+
 # Change to application user
 USER 2000
